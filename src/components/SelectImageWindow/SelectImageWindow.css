@@ -1,0 +1,7 @@
+.select-image-window {
+  padding: 1rem;
+  background-color: inherit;
+  color: inherit;
+  border-radius: 6px;
+  /* 可根据需求添加其它样式 */
+}

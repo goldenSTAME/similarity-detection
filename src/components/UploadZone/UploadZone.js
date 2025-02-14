@@ -1,13 +1,6 @@
 import React from "react";
+import "./UploadZone.css";
 
-/**
- * 上传区域组件：可拖拽或点击选择文件
- * @param {boolean} dragOver - 是否处于拖拽悬浮状态
- * @param {Function} handleDragOver - 拖拽进入回调
- * @param {Function} handleDragLeave - 拖拽离开回调
- * @param {Function} handleDrop - 文件放下回调
- * @param {Function} handleFileChange - 选择文件回调
- */
 function UploadZone({
   dragOver,
   handleDragOver,

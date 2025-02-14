@@ -8,18 +8,8 @@
   align-items: center;
   padding: 20px 0;
   box-sizing: border-box;
-  background-color: #f0f0f0;
-  transition: background-color 0.5s ease, color 0.5s ease;
-}
-
-.dark-mode {
-  background-color: #333;
-  color: #fff;
-}
-
-.light-mode {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: inherit;
+  color: inherit;
 }
 
 /* 头部 Logo */
@@ -44,9 +34,14 @@
   padding: 0;
 }
 .menu-item {
+  display: flex;
+  align-items: center;
   padding: 10px 20px;
   cursor: pointer;
   transition: background-color 0.2s;
+}
+.icon-history {
+  margin-right: 8px;
 }
 .menu-item:hover {
   background-color: rgba(0, 0, 0, 0.05);

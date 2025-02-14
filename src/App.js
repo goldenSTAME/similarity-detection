@@ -1,104 +1,52 @@
 import React, { useState } from "react";
-import Sidebar from "./components/Sidebar";
-import UploadZone from "./components/UploadZone";
+import Sidebar from "./components/Sidebar/Sidebar";
+import SelectImageWindow from "./components/SelectImageWindow/SelectImageWindow";
 import "./App.css";
 
 function App() {
-  // 1. 主题状态：true 表示暗色模式，false 表示浅色模式
-  const [isDark, setIsDark] = useState(false);
+const [activeWindow, setActiveWindow] = useState("Select Image");
+  const [isDark, setIsDark] = useState(() => {
+    // 读取 localStorage 的保存值
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme !== null) {
+      return savedTheme === "dark";
+    }
+    // 如果没有保存值则读取系统偏好防止出现bug
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
 
-  // 2. 拖拽悬浮状态
-  const [dragOver, setDragOver] = useState(false);
-
-  // 3. 存储上传的文件
-  const [uploadedFile, setUploadedFile] = useState(null);
-
-  // 切换主题
   const toggleTheme = () => {
-    setIsDark(!isDark);
+    setIsDark((prev) => {
+      const newTheme = !prev;
+      // 保存主题选择到 localStorage
+      localStorage.setItem("theme", newTheme ? "dark" : "light");
+      return newTheme;
+    });
   };
 
-  // 拖拽进入
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
 
-  // 拖拽离开
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-  };
-
-  // 文件放下
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      setUploadedFile(file);
-      console.log("Dropped file:", file.name);
-      // TODO: 在这里可调用后端进行图像分割或其他操作
+  const renderWindowContent = () => {
+    switch (activeWindow) {
+      case "Select Image":
+        return <SelectImageWindow />;
+      // 其他窗口例如 History、Details 等可在此处添加对应组件
+      default:
+        return <div>默认窗口内容</div>;
     }
-  };
-
-  // “SELECT FILE” 按钮选择文件
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setUploadedFile(file);
-      console.log("Selected file:", file.name);
-      // TODO: 在这里可调用后端进行图像分割或其他操作
-    }
-  };
-
-  // “Detect” 按钮
-  const handleDetect = () => {
-    if (!uploadedFile) {
-      alert("No file selected!");
-      return;
-    }
-    // TODO: 调用后端或执行图像分割/相似度检测逻辑
-    console.log("Detecting with file:", uploadedFile.name);
-  };
-
-  // “Cancel” 按钮
-  const handleCancel = () => {
-    setUploadedFile(null);
   };
 
   return (
     <div className={`app-container ${isDark ? "dark" : "light"}`}>
-      {/* 左侧侧边栏 */}
-      <Sidebar isDark={isDark} toggleTheme={toggleTheme} />
-
-      {/* 右侧主内容 */}
+      <Sidebar
+        isDark={isDark}
+        toggleTheme={toggleTheme}
+        activeWindow={activeWindow}
+        setActiveWindow={setActiveWindow}
+      />
       <main className="main-content">
-        <h2 className="main-title">Please verify your identity</h2>
-        <p className="main-subtitle">
-          Select relevant documents to complete your kyc
-        </p>
-
-        <UploadZone
-          dragOver={dragOver}
-          handleDragOver={handleDragOver}
-          handleDragLeave={handleDragLeave}
-          handleDrop={handleDrop}
-          handleFileChange={handleFileChange}
-        />
-
-        {/* 底部按钮行 */}
-        <div className="action-row">
-          <button className="cancel-btn" onClick={handleCancel}>
-            Cancel
-          </button>
-          <button className="detect-btn" onClick={handleDetect}>
-            Detect
-          </button>
-        </div>
+        {renderWindowContent()}
       </main>
     </div>
   );
 }
-
 export default App;

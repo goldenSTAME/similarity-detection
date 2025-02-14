@@ -1,16 +1,15 @@
 /* App.css */
 
 /* 基本布局 */
+/* App.css */
 .app-container {
   display: flex;
   min-height: 100vh;
   font-family: sans-serif;
   margin: 0;
-  /* 增加明暗切换的动画效果 */
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-/* 浅色 / 深色主题 */
 .light {
   background-color: #f5f5f5;
   color: #333;
@@ -37,54 +36,18 @@
   margin-bottom: 2rem;
 }
 
-/* 上传区域 */
-.upload-zone {
-  width: 420px;
-  min-height: 160px;
-  border: 2px dashed #ccc;
-  border-radius: 6px;
-  text-align: center;
-  padding: 1rem;
-  box-sizing: border-box;
-  margin-bottom: 1.5rem;
-  /* 上传区域也添加过渡效果 */
-  transition: background-color 0.5s ease, border-color 0.5s ease;
-}
-.upload-zone.drag-over {
-  background-color: #e6f7ff;
-  border-color: #1890ff;
+:root {
+  --bg-color-light: #f5f5f5;
+  --text-color-light: #333;
+  --bg-color-dark: #2c2c2c;
+  --text-color-dark: #eee;
 }
 
-/* 按钮 */
-.select-file-btn {
-  display: inline-block;
-  margin-top: 0.5rem;
-  padding: 0.4rem 1rem;
-  background-color: #007bff;
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
+.light {
+  background-color: var(--bg-color-light);
+  color: var(--text-color-light);
 }
-
-/* 底部按钮 */
-.action-row {
-  display: flex;
-  gap: 1rem;
-}
-.cancel-btn {
-  background-color: #6c757d;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.detect-btn {
-  background-color: #28a745;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
+.dark {
+  background-color: var(--bg-color-dark);
+  color: var(--text-color-dark);
 }

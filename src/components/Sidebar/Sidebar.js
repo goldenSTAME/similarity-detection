@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Lottie from "react-lottie";
 import selectImageAnimation from "../animations/selectImage.json";
@@ -8,30 +8,45 @@ import logsAnimation from "../animations/logs.json";
 import "./Sidebar.css";
 
 function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
-  // 处理 Light 模式点击事件
+  const [isLottiePlaying, setIsLottiePlaying] = useState({
+    "Select Image": false,
+    "History": false,
+    "Details": false,
+    "Logs": false,
+  });
+
+  // 控制动画播放，防止首次加载时播放
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsLottiePlaying({
+        "Select Image": false,
+        "History": false,
+        "Details": false,
+        "Logs": false,
+      });
+    });
+    return () => clearTimeout(timeout);
+  }, []);
+
   const handleLightClick = () => {
     if (isDark) toggleTheme();
   };
 
-  // 处理 Dark 模式点击事件
   const handleDarkClick = () => {
     if (!isDark) toggleTheme();
   };
 
-  // 图标动画的初始状态和激活状态
   const iconVariants = {
     initial: { rotate: 0, scale: 1 },
     active: { rotate: 15, scale: 1.1 },
   };
 
-  // 根据当前主题状态调整滑动条动画
   const sliderAnimation = {
     x: isDark ? 90 : 0,
     rotate: 0,
     scale: 1,
   };
 
-  // 菜单项配置，包括名称和对应的动画
   const menuItems = [
     { name: "Select Image", animation: selectImageAnimation },
     { name: "History", animation: historyAnimation },
@@ -40,6 +55,21 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     { name: "Setting", animation: null },
     { name: "Support", animation: null },
   ];
+
+  const handleItemClick = (itemName) => {
+    setActiveWindow(itemName);
+    setIsLottiePlaying((prevState) => ({
+      ...prevState,
+      [itemName]: true,
+    }));
+  };
+
+  const handleAnimationComplete = (itemName) => {
+    setIsLottiePlaying((prevState) => ({
+      ...prevState,
+      [itemName]: false,
+    }));
+  };
 
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
@@ -53,11 +83,26 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
             <li
               key={item.name}
               className={`menu-item ${activeWindow === item.name ? "active" : ""}`}
-              onClick={() => setActiveWindow(item.name)}
+              onClick={() => handleItemClick(item.name)}
             >
               {item.animation && (
                 <div className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}>
-                  <Lottie options={{ animationData: item.animation }} height={24} width={24} />
+                  <Lottie
+                    options={{
+                      animationData: item.animation,
+                      loop: false, // 禁止循环
+                    }}
+                    height={24}
+                    width={24}
+                    isStopped={!isLottiePlaying[item.name]} // 控制动画停止
+                    isPaused={!isLottiePlaying[item.name]}  // 控制动画暂停
+                    eventListeners={[
+                      {
+                        eventName: "complete",
+                        callback: () => handleAnimationComplete(item.name), // 动画完成时触发
+                      },
+                    ]}
+                  />
                 </div>
               )}
               <span>{item.name}</span>
@@ -76,7 +121,6 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
               transition={{ type: "spring", stiffness: 150, damping: 20 }}
             />
 
-            {/* Light 按钮 */}
             <motion.button
               className={`segment-button ${!isDark ? "active" : ""}`}
               onClick={handleLightClick}
@@ -119,7 +163,6 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
               </motion.span>
             </motion.button>
 
-            {/* Dark 按钮 */}
             <motion.button
               className={`segment-button ${isDark ? "active" : ""}`}
               onClick={handleDarkClick}

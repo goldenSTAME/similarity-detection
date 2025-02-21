@@ -56,7 +56,7 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     { name: "Support", animation: null },
   ];
 
-  const handleItemClick = (itemName) => {
+  const handleItemMouseDown = (itemName) => {
     setActiveWindow(itemName);
     setIsLottiePlaying((prevState) => ({
       ...prevState,
@@ -83,7 +83,7 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
             <li
               key={item.name}
               className={`menu-item ${activeWindow === item.name ? "active" : ""}`}
-              onClick={() => handleItemClick(item.name)}
+              onMouseDown={() => handleItemMouseDown(item.name)} // 使用 onMouseDown
             >
               {item.animation && (
                 <div className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}>

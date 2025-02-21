@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Lottie from "react-lottie";
 import selectImageAnimation from "../animations/selectImage.json";
@@ -6,6 +6,23 @@ import historyAnimation from "../animations/history.json";
 import detailsAnimation from "../animations/details.json";
 import logsAnimation from "../animations/logs.json";
 import "./Sidebar.css";
+
+// 添加帧率和总帧数配置
+const ANIMATION_CONFIG = {
+  "Select Image": { totalFrames: 50, frameRate: 30 },  // 总帧数需要与Lottie动画实际帧数一致
+  "History": { totalFrames: 51, frameRate: 30 },
+  "Details": { totalFrames: 57, frameRate: 30 },
+  "Logs": { totalFrames: 57, frameRate: 30 }
+};
+
+const menuItems = [
+  { name: "Select Image", animation: selectImageAnimation, framePause: 22 },
+  { name: "History", animation: historyAnimation, framePause: 23 },
+  { name: "Details", animation: detailsAnimation, framePause: 23 },
+  { name: "Logs", animation: logsAnimation, framePause: 20 },
+  { name: "Setting", animation: null },
+  { name: "Support", animation: null },
+];
 
 function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
   const [isLottiePlaying, setIsLottiePlaying] = useState({
@@ -15,7 +32,32 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     "Logs": false,
   });
 
-  // 控制动画播放，防止首次加载时播放
+  const [isInteracting, setIsInteracting] = useState({
+    "Select Image": false,
+    "History": false,
+    "Details": false,
+    "Logs": false,
+  });
+
+  const isInteractingRef = useRef(isInteracting);
+
+  const lottieRefs = useRef({
+    "Select Image": null,
+    "History": null,
+    "Details": null,
+    "Logs": null
+  });
+
+  const playbackState = useRef({
+    currentItem: null,
+    startTime: null,
+    pausedFrame: null
+  });
+
+  useEffect(() => {
+    isInteractingRef.current = isInteracting;
+  }, [isInteracting]);
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsLottiePlaying({
@@ -28,6 +70,7 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     return () => clearTimeout(timeout);
   }, []);
 
+  // 主题切换
   const handleLightClick = () => {
     if (isDark) toggleTheme();
   };
@@ -47,32 +90,83 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     scale: 1,
   };
 
-  const menuItems = [
-    { name: "Select Image", animation: selectImageAnimation },
-    { name: "History", animation: historyAnimation },
-    { name: "Details", animation: detailsAnimation },
-    { name: "Logs", animation: logsAnimation },
-    { name: "Setting", animation: null },
-    { name: "Support", animation: null },
-  ];
-
   const handleItemClick = (itemName) => {
     setActiveWindow(itemName);
   };
 
+  // 鼠标按下事件，开始播放动画
   const handleItemMouseDown = (itemName) => {
-    setIsLottiePlaying((prevState) => ({
-      ...prevState,
-      [itemName]: true,
-    }));
+    const anim = lottieRefs.current[itemName];
+    if (!anim) return;
+
+    anim.anim.goToAndStop(0, true);
+    playbackState.current = {
+      currentItem: itemName,
+      startTime: Date.now(),
+      pausedFrame: null
+    };
+
+    setIsInteracting(prev => ({ ...prev, [itemName]: true }));
+    setIsLottiePlaying(prev => ({ ...prev, [itemName]: true }));
   };
 
-  const handleAnimationComplete = (itemName) => {
-    setIsLottiePlaying((prevState) => ({
-      ...prevState,
-      [itemName]: false,
-    }));
+  // 鼠标释放事件，固定1.75倍速
+  const handleItemMouseUp = (itemName) => {
+    const state = playbackState.current;
+    if (!state.currentItem || state.currentItem !== itemName) return;
+
+    const anim = lottieRefs.current[itemName];
+    if (!anim?.anim) return;
+
+    // 固定1.75倍速
+    anim.anim.setSpeed(1.75);
+    anim.anim.play();
+
+    // 更新状态
+    setIsInteracting(prev => ({ ...prev, [itemName]: false }));
+    setIsLottiePlaying(prev => ({ ...prev, [itemName]: true }));
+
+    // 重置播放状态
+    playbackState.current = {
+      currentItem: null,
+      startTime: null,
+      pausedFrame: null
+    };
   };
+
+  // 处理动画帧事件
+  const handleAnimationFrame = (itemName, animationEvent) => {
+    const currentFrame = Math.floor(animationEvent.currentTime);
+    const targetFrame = menuItems.find(i => i.name === itemName).framePause;
+
+    if (currentFrame >= targetFrame && isInteractingRef.current[itemName]) {
+      lottieRefs.current[itemName]?.anim.pause();
+      playbackState.current.pausedFrame = currentFrame;
+      setIsLottiePlaying(prev => ({ ...prev, [itemName]: false }));
+    }
+  };
+
+  // 动画完成后重置状态
+  const handleAnimationComplete = (itemName) => {
+    // 重置为正常速度
+    lottieRefs.current[itemName]?.anim.setSpeed(1);
+    lottieRefs.current[itemName]?.anim.stop();
+
+    // 更新状态
+    setIsLottiePlaying(prev => ({ ...prev, [itemName]: false }));
+    setIsInteracting(prev => ({ ...prev, [itemName]: false }));
+  };
+
+  const lottieOptions = (itemName) => ({
+    animationData: menuItems.find(i => i.name === itemName).animation,
+    loop: false,
+    autoplay: false,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+      progressiveLoad: true,  // 添加渐进加载
+      imagePreserveAspectRatio: "xMidYMid slice"
+    }
+  });
 
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
@@ -86,25 +180,30 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
             <li
               key={item.name}
               className={`menu-item ${activeWindow === item.name ? "active" : ""}`}
-              onClick={() => handleItemClick(item.name)} // 使用 onClick 来切换窗口
-              onMouseDown={() => handleItemMouseDown(item.name)} // 使用 onMouseDown 来控制动画
+              onClick={() => handleItemClick(item.name)}
+              onMouseDown={() => handleItemMouseDown(item.name)}
+              onMouseUp={() => handleItemMouseUp(item.name)}
+              onMouseLeave={() => handleItemMouseUp(item.name)} // 防止鼠标移出后状态卡住
             >
               {item.animation && (
                 <div className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}>
                   <Lottie
-                    options={{
-                      animationData: item.animation,
-                      loop: false, // 禁止循环
-                    }}
+                    ref={(ref) => (lottieRefs.current[item.name] = ref)}
+                    options={lottieOptions(item.name)}
                     height={24}
                     width={24}
-                    isStopped={!isLottiePlaying[item.name]} // 控制动画停止
-                    isPaused={!isLottiePlaying[item.name]}  // 控制动画暂停
+                    isPaused={!isLottiePlaying[item.name]}
                     eventListeners={[
                       {
                         eventName: "complete",
-                        callback: () => handleAnimationComplete(item.name), // 动画完成时触发
+                        callback: () => {
+                          handleAnimationComplete(item.name); // Handle animation complete
+                        }
                       },
+                      {
+                        eventName: "enterFrame",
+                        callback: (e) => handleAnimationFrame(item.name, e)
+                      }
                     ]}
                   />
                 </div>

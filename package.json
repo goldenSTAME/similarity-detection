@@ -6,8 +6,11 @@
     "canvas-confetti": "^1.9.3",
     "cra-template": "1.2.0",
     "framer-motion": "^12.4.2",
+    "lottie-react": "^2.4.1",
+    "lottie-web": "^5.12.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-lottie": "^1.2.10",
     "react-scripts": "5.0.1",
     "react-tsparticles": "^2.12.2",
     "web-vitals": "^4.2.4"

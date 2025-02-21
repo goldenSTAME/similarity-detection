@@ -11,7 +11,6 @@
   background-color: inherit;
   color: inherit;
 }
-
 /* 头部 Logo */
 .sidebar-header {
   margin-bottom: 20px;
@@ -159,6 +158,38 @@
   margin-right: 4px;
 }
 
+/* Lottie 动画容器样式 */
+.lottie-container {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 基础过渡效果 */
+.lottie-container path,
+.lottie-container rect,
+.lottie-container circle {
+  transition: fill 0.5s ease, stroke 0.5s ease;
+}
+
+/* 深色模式 Lottie 颜色 */
+.dark-lottie path,
+.dark-lottie rect,
+.dark-lottie circle {
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* 浅色模式 Lottie 颜色 */
+.light-lottie path,
+.light-lottie rect,
+.light-lottie circle {
+  stroke: #121212 !important;
+  fill: #121212 !important;
+}
 /*.slider-particle {*/
 /*  position: absolute;*/
 /*  width: 6px;*/

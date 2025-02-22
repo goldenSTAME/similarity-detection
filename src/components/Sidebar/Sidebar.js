@@ -7,14 +7,6 @@ import detailsAnimation from "../animations/details.json";
 import logsAnimation from "../animations/logs.json";
 import "./Sidebar.css";
 
-// 添加帧率和总帧数配置
-const ANIMATION_CONFIG = {
-  "Select Image": { totalFrames: 50, frameRate: 30 },  // 总帧数需要与Lottie动画实际帧数一致
-  "History": { totalFrames: 51, frameRate: 30 },
-  "Details": { totalFrames: 57, frameRate: 30 },
-  "Logs": { totalFrames: 57, frameRate: 30 }
-};
-
 const menuItems = [
   { name: "Select Image", animation: selectImageAnimation, framePause: 22 },
   { name: "History", animation: historyAnimation, framePause: 23 },
@@ -32,15 +24,6 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     "Logs": false,
   });
 
-  const [isInteracting, setIsInteracting] = useState({
-    "Select Image": false,
-    "History": false,
-    "Details": false,
-    "Logs": false,
-  });
-
-  const isInteractingRef = useRef(isInteracting);
-
   const lottieRefs = useRef({
     "Select Image": null,
     "History": null,
@@ -48,35 +31,20 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     "Logs": null
   });
 
-  const playbackState = useRef({
+  const animationState = useRef({
     currentItem: null,
-    startTime: null,
-    pausedFrame: null
+    pausedFrame: null,
+    totalFrames: {
+      "Select Image": selectImageAnimation.op - 1,
+      "History": historyAnimation.op - 1,
+      "Details": detailsAnimation.op - 1,
+      "Logs": logsAnimation.op - 1
+    }
   });
 
-  useEffect(() => {
-    isInteractingRef.current = isInteracting;
-  }, [isInteracting]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsLottiePlaying({
-        "Select Image": false,
-        "History": false,
-        "Details": false,
-        "Logs": false,
-      });
-    });
-    return () => clearTimeout(timeout);
-  }, []);
-
   // 主题切换
-  const handleLightClick = () => {
-    if (isDark) toggleTheme();
-  };
-
-  const handleDarkClick = () => {
-    if (!isDark) toggleTheme();
+  const handleThemeClick = (isDarkTarget) => {
+    if (isDark !== isDarkTarget) toggleTheme();
   };
 
   const iconVariants = {
@@ -86,75 +54,46 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
 
   const sliderAnimation = {
     x: isDark ? 90 : 0,
-    rotate: 0,
-    scale: 1,
   };
 
   const handleItemClick = (itemName) => {
     setActiveWindow(itemName);
   };
 
-  // 鼠标按下事件，开始播放动画
   const handleItemMouseDown = (itemName) => {
     const anim = lottieRefs.current[itemName];
-    if (!anim) return;
+    if (!anim || isLottiePlaying[itemName]) return;
 
-    anim.anim.goToAndStop(0, true);
-    playbackState.current = {
-      currentItem: itemName,
-      startTime: Date.now(),
-      pausedFrame: null
-    };
+    animationState.current.currentItem = itemName;
+    anim.anim.stop();
+    anim.anim.playSegments([0, menuItems.find(i => i.name === itemName).framePause], true);
 
-    setIsInteracting(prev => ({ ...prev, [itemName]: true }));
     setIsLottiePlaying(prev => ({ ...prev, [itemName]: true }));
   };
 
-  // 鼠标释放事件，固定1.75倍速
   const handleItemMouseUp = (itemName) => {
-    const state = playbackState.current;
+    const state = animationState.current;
     if (!state.currentItem || state.currentItem !== itemName) return;
 
     const anim = lottieRefs.current[itemName];
     if (!anim?.anim) return;
 
-    // 固定1.75倍速
+    const currentFrame = Math.min(
+      anim.anim.currentFrame,
+      state.totalFrames[itemName]
+    );
+
     anim.anim.setSpeed(1.75);
-    anim.anim.play();
-
-    // 更新状态
-    setIsInteracting(prev => ({ ...prev, [itemName]: false }));
-    setIsLottiePlaying(prev => ({ ...prev, [itemName]: true }));
-
-    // 重置播放状态
-    playbackState.current = {
-      currentItem: null,
-      startTime: null,
-      pausedFrame: null
-    };
+    anim.anim.playSegments([
+      currentFrame,
+      state.totalFrames[itemName]
+    ], true);
   };
 
-  // 处理动画帧事件
-  const handleAnimationFrame = (itemName, animationEvent) => {
-    const currentFrame = Math.floor(animationEvent.currentTime);
-    const targetFrame = menuItems.find(i => i.name === itemName).framePause;
-
-    if (currentFrame >= targetFrame && isInteractingRef.current[itemName]) {
-      lottieRefs.current[itemName]?.anim.pause();
-      playbackState.current.pausedFrame = currentFrame;
-      setIsLottiePlaying(prev => ({ ...prev, [itemName]: false }));
-    }
-  };
-
-  // 动画完成后重置状态
   const handleAnimationComplete = (itemName) => {
-    // 重置为正常速度
     lottieRefs.current[itemName]?.anim.setSpeed(1);
-    lottieRefs.current[itemName]?.anim.stop();
-
-    // 更新状态
     setIsLottiePlaying(prev => ({ ...prev, [itemName]: false }));
-    setIsInteracting(prev => ({ ...prev, [itemName]: false }));
+    animationState.current.currentItem = null;
   };
 
   const lottieOptions = (itemName) => ({
@@ -163,13 +102,13 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     autoplay: false,
     rendererSettings: {
       preserveAspectRatio: "xMidYMid slice",
-      progressiveLoad: true,  // 添加渐进加载
-      imagePreserveAspectRatio: "xMidYMid slice"
+      progressiveLoad: true
     }
   });
 
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
+      {/* 保持原有DOM结构不变 */}
       <div className="sidebar-header">
         <div className="logo-placeholder"></div>
       </div>
@@ -181,9 +120,9 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
               key={item.name}
               className={`menu-item ${activeWindow === item.name ? "active" : ""}`}
               onClick={() => handleItemClick(item.name)}
-              onMouseDown={() => handleItemMouseDown(item.name)}
-              onMouseUp={() => handleItemMouseUp(item.name)}
-              onMouseLeave={() => handleItemMouseUp(item.name)} // 防止鼠标移出后状态卡住
+              onMouseDown={() => item.animation && handleItemMouseDown(item.name)}
+              onMouseUp={() => item.animation && handleItemMouseUp(item.name)}
+              onMouseLeave={() => item.animation && handleItemMouseUp(item.name)}
             >
               {item.animation && (
                 <div className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}>
@@ -193,18 +132,10 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
                     height={24}
                     width={24}
                     isPaused={!isLottiePlaying[item.name]}
-                    eventListeners={[
-                      {
-                        eventName: "complete",
-                        callback: () => {
-                          handleAnimationComplete(item.name); // Handle animation complete
-                        }
-                      },
-                      {
-                        eventName: "enterFrame",
-                        callback: (e) => handleAnimationFrame(item.name, e)
-                      }
-                    ]}
+                    eventListeners={[{
+                      eventName: "complete",
+                      callback: () => handleAnimationComplete(item.name)
+                    }]}
                   />
                 </div>
               )}
@@ -226,7 +157,7 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
 
             <motion.button
               className={`segment-button ${!isDark ? "active" : ""}`}
-              onClick={handleLightClick}
+              onClick={() => handleThemeClick(false)}
             >
               <motion.span
                 className="button-text"
@@ -268,7 +199,7 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
 
             <motion.button
               className={`segment-button ${isDark ? "active" : ""}`}
-              onClick={handleDarkClick}
+              onClick={() => handleThemeClick(true)}
             >
               <motion.span
                 className="button-text"

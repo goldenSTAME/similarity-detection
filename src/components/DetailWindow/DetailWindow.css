@@ -1,0 +1,78 @@
+.detail-window {
+    width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: inherit;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.detail-window h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.detail-window input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.detail-window button {
+    width: 48%;
+    padding: 10px;
+    margin: 5px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.detail-window .create-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.detail-window .read-btn {
+    background-color: #2196F3;
+    color: white;
+}
+
+.detail-window .update-btn {
+    background-color: #FF9800;
+    color: white;
+}
+
+.detail-window .delete-btn {
+    background-color: #F44336;
+    color: white;
+}
+
+.detail-window button:hover {
+    opacity: 0.8;
+}
+
+.detail-window button:active {
+    transform: scale(0.95);
+}
+
+.detail-window pre {
+    text-align: left;
+    background: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+    color: #2c2c2c;
+    font-size: inherit;
+    font-style: inherit;
+}

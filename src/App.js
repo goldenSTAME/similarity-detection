@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SelectImageWindow from "./components/SelectImageWindow/SelectImageWindow";
+import  DetailWindow from "./components/DetailWindow/DetailWindow";
 import "./App.css";
 
 function App() {
@@ -29,6 +30,8 @@ const [activeWindow, setActiveWindow] = useState("Select Image");
     switch (activeWindow) {
       case "Select Image":
         return <SelectImageWindow />;
+      case "Details":
+        return <DetailWindow />;
       // 其他窗口例如 History、Details 等可在此处添加对应组件
       default:
         return <div>默认窗口内容(该串语句用于测试github action是否正常使用）</div>;

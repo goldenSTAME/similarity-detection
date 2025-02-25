@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+// 保留 react-lottie 导入（未使用，注释化）
 import Lottie from "react-lottie";
+// 保留 lottie-web 导入（使用中）
+import lottie from "lottie-web";
 import selectImageAnimation from "../animations/selectImage.json";
 import historyAnimation from "../animations/history.json";
 import detailsAnimation from "../animations/details.json";
@@ -28,7 +31,7 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     "Select Image": null,
     "History": null,
     "Details": null,
-    "Logs": null
+    "Logs": null,
   });
 
   const animationState = useRef({
@@ -38,11 +41,41 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
       "Select Image": selectImageAnimation.op - 1,
       "History": historyAnimation.op - 1,
       "Details": detailsAnimation.op - 1,
-      "Logs": logsAnimation.op - 1
-    }
+      "Logs": logsAnimation.op - 1,
+    },
   });
 
-  // 主题切换
+  // 在组件挂载时加载动画（使用 lottie-web）
+  useEffect(() => {
+    menuItems.forEach((item) => {
+      if (item.animation) {
+        const container = document.getElementById(`lottie-${item.name}`);
+        if (container) {
+          lottieRefs.current[item.name] = lottie.loadAnimation({
+            container,
+            animationData: item.animation,
+            loop: false,
+            autoplay: false,
+          });
+
+          // 监听动画完成事件，重置播放状态
+          lottieRefs.current[item.name].addEventListener("complete", () => {
+            setIsLottiePlaying((prev) => ({ ...prev, [item.name]: false }));
+            console.log(`动画 ${item.name} 播放完成，状态重置为未播放`);
+          });
+        }
+      }
+    });
+
+    // 组件卸载时清理动画实例
+    return () => {
+      Object.values(lottieRefs.current).forEach((anim) => {
+        if (anim) anim.destroy();
+      });
+    };
+  }, []);
+
+  // 主题切换逻辑
   const handleThemeClick = (isDarkTarget) => {
     if (isDark !== isDarkTarget) toggleTheme();
   };
@@ -60,6 +93,31 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     setActiveWindow(itemName);
   };
 
+  // 点击菜单项时触发的函数，确保倍速播放且动画不被打断
+  const handleItemMouseDown = (itemName) => {
+    const anim = lottieRefs.current[itemName];
+    if (!anim) {
+      console.error(`动画实例 ${itemName} 不存在`);
+      return;
+    }
+
+    // 如果动画正在播放，忽略此次点击
+    if (isLottiePlaying[itemName]) {
+      console.log(`动画 ${itemName} 正在播放，忽略此次点击`);
+      return;
+    }
+
+    console.log(`触发 ${itemName} 动画播放`);
+    anim.setSpeed(1.75); // 设置播放速度为 1.75 倍
+    anim.goToAndStop(0); // 重置到第一帧
+    anim.playSegments([0, anim.totalFrames - 1], true); // 从头播放到结束
+
+    // 更新播放状态
+    setIsLottiePlaying((prev) => ({ ...prev, [itemName]: true }));
+  };
+
+  // 恢复原有的鼠标按下和松开逻辑，注释化以便后续恢复
+  /*
   const handleItemMouseDown = (itemName) => {
     const anim = lottieRefs.current[itemName];
     if (!anim || isLottiePlaying[itemName]) return;
@@ -89,26 +147,37 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
       state.totalFrames[itemName]
     ], true);
   };
+  */
 
-  const handleAnimationComplete = (itemName) => {
-    lottieRefs.current[itemName]?.anim.setSpeed(1);
-    setIsLottiePlaying(prev => ({ ...prev, [itemName]: false }));
-    animationState.current.currentItem = null;
-  };
-
+  // 恢复 Lottie 动画的配置选项（未使用，注释化）
+  /*
   const lottieOptions = (itemName) => ({
-    animationData: menuItems.find(i => i.name === itemName).animation,
+    animationData: menuItems.find((i) => i.name === itemName).animation,
     loop: false,
     autoplay: false,
     rendererSettings: {
       preserveAspectRatio: "xMidYMid slice",
-      progressiveLoad: true
-    }
+      progressiveLoad: true,
+    },
   });
+  */
+
+  // 恢复动画完成后的回调（未使用，注释化）
+  /*
+  const handleAnimationComplete = (itemName) => {
+    const anim = lottieRefs.current[itemName];
+    if (anim) {
+      anim.anim.setSpeed(1); // 可选：重置速度为 1 倍，视需求可删除
+      console.log(`动画 ${itemName} 播放完成，速度重置为: ${anim.anim.animationSpeed || '未知'}`);
+    }
+    // 更新播放状态为未播放
+    setIsLottiePlaying((prev) => ({ ...prev, [itemName]: false }));
+    animationState.current.currentItem = null;
+  };
+  */
 
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
-      {/* 保持原有DOM结构不变 */}
       <div className="sidebar-header">
         <div className="logo-placeholder"></div>
       </div>
@@ -121,24 +190,35 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
               className={`menu-item ${activeWindow === item.name ? "active" : ""}`}
               onClick={() => handleItemClick(item.name)}
               onMouseDown={() => item.animation && handleItemMouseDown(item.name)}
+              // 原有的 mouseUp 和 mouseLeave 事件，注释化以便后续恢复
+              /*
               onMouseUp={() => item.animation && handleItemMouseUp(item.name)}
               onMouseLeave={() => item.animation && handleItemMouseUp(item.name)}
+              */
             >
               {item.animation && (
-                <div className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}>
-                  <Lottie
-                    ref={(ref) => (lottieRefs.current[item.name] = ref)}
-                    options={lottieOptions(item.name)}
-                    height={24}
-                    width={24}
-                    isPaused={!isLottiePlaying[item.name]}
-                    eventListeners={[{
-                      eventName: "complete",
-                      callback: () => handleAnimationComplete(item.name)
-                    }]}
-                  />
-                </div>
+                <div
+                  id={`lottie-${item.name}`}
+                  className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}
+                  style={{ width: 24, height: 24 }}
+                />
               )}
+              {/* 恢复使用 react-lottie's Lottie 组件，避免引用未定义变量 */}
+              {/*{item.animation && (*/}
+              {/*  <div className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}>*/}
+              {/*    <Lottie*/}
+              {/*      ref={(ref) => (lottieRefs.current[item.name] = ref)}*/}
+              {/*      options={{ animationData: item.animation, loop: false, autoplay: false }} // 静态值*/}
+              {/*      height={24}*/}
+              {/*      width={24}*/}
+              {/*      isPaused={!isLottiePlaying[item.name]}*/}
+              {/*      eventListeners={[{*/}
+              {/*        eventName: "complete",*/}
+              {/*        callback: () => {} // 空回调避免引用未定义变量*/}
+              {/*      }]}*/}
+              {/*    />*/}
+              {/*  </div>*/}
+              {/*)}*/}
               <span>{item.name}</span>
             </li>
           ))}

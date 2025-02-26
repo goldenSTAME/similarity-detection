@@ -6,7 +6,8 @@ function UploadZone({
   handleDragOver,
   handleDragLeave,
   handleDrop,
-  handleFileChange
+  handleFileChange,
+    uploadedImage,
 }) {
   return (
     <div
@@ -15,8 +16,18 @@ function UploadZone({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <p>Select a file or drag and drop here</p>
-      <p>JPG, PNG, file size no more than 10MB</p>
+      {uploadedImage ? (
+          // 如果有图片，显示预览
+          <img src={uploadedImage} alt="Uploaded preview" className="uploaded-image" />
+      ) : (
+          // 否则显示默认提示文本
+          <>
+            <p>Select a file or drag and drop here</p>
+            <p>JPG, PNG, file size no more than 10MB</p>
+          </>
+      )}
+
+      {/* 选择文件按钮 */}
       <label htmlFor="fileInput" className="select-file-btn">
         SELECT FILE
       </label>

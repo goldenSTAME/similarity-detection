@@ -1,0 +1,22 @@
+/* src/components/DetailWindow/Read.css */
+
+.read {
+    margin: 20px 0;
+    border: 2px solid #ccc; /* 边框颜色和宽度 */
+    border-radius: 10px; /* 设置圆角 */
+    padding: 20px; /* 内边距 */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* 可选：增加阴影效果 */
+}
+
+.read input {
+    width: 80%;
+    max-width: 800px;
+    margin: 10px auto;
+    padding: 8px;
+}
+
+.read button {
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+}

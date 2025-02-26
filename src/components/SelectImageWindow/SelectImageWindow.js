@@ -1,13 +1,17 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { ImageUtils } from '../../Utils/ImageUtils';
+import './SelectImageWindow.css';
 import UploadZone from "../UploadZone/UploadZone";
-import "./SelectImageWindow.css";
-import { convertToBase64, uploadImage } from "../../Utils/ImageUtils.js";
 
 function SelectImageWindow() {
+  const [image, setImage] = useState(null); // 当前选择的图像
+  const [similarImages, setSimilarImages] = useState([]); // 存储相似图像结果
+  const [numResults, setNumResults] = useState(5); // 默认显示 5 张相似图像
+const [imagePreview, setImagePreview] = useState(null); // 用于网页中显示图像
+const [searched, setSearched] = useState(false); //判断是否搜索过
   // 控制拖拽状态
   const [dragOver, setDragOver] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [base64Image, setBase64Image] = useState("");
+
   const handleDragOver = (e) => {
     e.preventDefault();
     setDragOver(true);
@@ -18,45 +22,54 @@ function SelectImageWindow() {
     setDragOver(false);
   };
 
-  const handleDrop = async (e) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
-
     const file = e.dataTransfer.files[0]; // 获取拖拽的文件
     if (file) {
-      await processFile(file);
+      setImage(file);
     }
     // 处理文件
     console.log("文件拖拽放下：", e.dataTransfer.files);
   };
-
+  // 处理文件选择
   const handleFileChange = async (e) => {
-    const file = e.target.files[0]; // 获取用户选择的文件
+    const file = e.target.files[0];
     if (file) {
       await processFile(file);
     }
-    console.log("文件选择：", e.target.files);
   };
 
-  // 处理文件转换为Base64
+  // 处理文件
   const processFile = async (file) => {
-    setSelectedFile(file); // 存储文件信息
+    setImage(file);
     try {
-      const base64 = await convertToBase64(file); // 转换为Base64
-      setBase64Image(base64);
+      const base64 = await ImageUtils.fileToBase64(file); // 调用 ImageUtils 转换 Base64
+      console.log("Base64 预览图:", base64); // 添加日志查看
+      setImagePreview(base64); // 更新预览
     } catch (error) {
-      console.error("Base64转换失败:", error);
+      console.error("文件转换失败:", error);
     }
   };
 
-  // 处理上传
-  const handleUpload = async () => {
-    if (!base64Image) {
-      alert("请先选择或拖拽图片！");
+  // 上传并显示相似图像
+  const handleSearch = async () => {
+    if (!image) {
+      alert("请先选择一张图片！");
       return;
     }
-    const result = await uploadImage(base64Image);
-    alert(result.message);
+    try {
+      const base64Image = await ImageUtils.fileToBase64(image); // 将图片转换为 Base64
+      console.log('上传的图片Base64:', base64Image);
+
+      // 向后端发送请求，获取相似图像
+      const results = await ImageUtils.uploadImage(base64Image, numResults);
+      setSimilarImages(results); // 更新相似图像结果
+      setSearched(true); // 标记为已搜索
+    } catch (error) {
+      console.error("图片上传失败:", error);
+      setSearched(true); // 即使失败，标记为已搜索
+    }
   };
 
   return (
@@ -68,14 +81,29 @@ function SelectImageWindow() {
             handleDragLeave={handleDragLeave}
             handleDrop={handleDrop}
             handleFileChange={handleFileChange}
+            uploadedImage={imagePreview} // 传递Base64预览
         />
 
-        {/* 显示文件信息 */}
-        {selectedFile && <p>已选择文件: {selectedFile.name}</p>}
-        {base64Image && <img src={base64Image} alt="预览" width="200" />}
+        <button onClick={handleSearch}>Search</button>
 
-        {/* 上传按钮 */}
-        <button onClick={handleUpload}>上传</button>
+        <div className="similar-images">
+          {!searched ? (
+              // 如果没有开始搜索，则什么都不显示
+              <p>请先上传并搜索图像。</p>
+          ) : similarImages.length > 0 ? (
+              // 如果有返回的图像，展示ID，相似度和图片
+              similarImages.map((imageData, index) => (
+                  <div key={index} className="image-item">
+                    <h4>ID: {imageData.id}</h4>
+                    <h5>相似度: {imageData.similarity.toFixed(4)}</h5>
+                    <img src={`data:image/png;base64,${imageData.processed_image_base64}`} alt={imageData.id} />
+                  </div>
+              ))
+          ) : (
+              // 如果没有返回图像，显示提示
+              <p>没有找到相似图像。</p>
+          )}
+        </div>
       </div>
   );
 }

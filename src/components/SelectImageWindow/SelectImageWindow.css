@@ -1,7 +1,31 @@
+/*.select-image-window {*/
+/*  padding: 1rem;*/
+/*  background-color: inherit;*/
+/*  color: inherit;*/
+/*  border-radius: 6px;*/
+/*  !* 可根据需求添加其它样式 *!*/
+/*}*/
+
 .select-image-window {
-  padding: 1rem;
-  background-color: inherit;
-  color: inherit;
-  border-radius: 6px;
-  /* 可根据需求添加其它样式 */
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.similar-images {
+  margin-top: 20px;
+}
+
+.image-item {
+  margin-bottom: 20px;
+}
+
+.image-item img {
+  max-width: 200px;
+  height: auto;
+}
+
+.image-item h4,
+.image-item h5 {
+  margin: 5px 0;
 }

@@ -1,37 +1,42 @@
-// src/utils/imageUtils.js
-export const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject("转换Base64失败: " + error);
-    });
-};
-
-export const uploadImage = async (base64Image) => {
-    if (!base64Image) {
-        alert("请先选择图片！");
-        return;
-    }
-
-    const imageId = `img_${Date.now()}`;
-
-    try {
-        const response = await fetch("http://127.0.0.1:5001/upload", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                image_id: imageId,
-                image_path: `uploads/${imageId}.jpg`,
-                features: base64Image, // 在Features中存入 Base64 数据
-                image: base64Image, // 存 Base64 数据
-            }),
+export class ImageUtils {
+    // 将文件转换为 Base64 字符串
+    static fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result;
+                resolve(base64String);
+            };
+            reader.onerror = (error) => {
+                reject(error);
+            };
+            reader.readAsDataURL(file); // 读取文件并触发 onloadend
         });
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("上传失败", error);
-        return { success: false, message: "上传失败" };
     }
-};
+
+    // 将 Base64 图片上传到后端并返回处理结果
+    static async uploadImage(base64Image, num = 5) {
+        try {
+            const response = await fetch('http://127.0.0.1:5000/relay_image', { // 假设后端 API 地址为 /relay_image
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image_base64: base64Image,
+                    num: num // 请求返回的相似图像数量
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('上传失败');
+            }
+
+            const data = await response.json();
+            return data; // 返回后端处理后的结果（包含图像 ID、相似度、图像数据）
+        } catch (error) {
+            console.error('上传失败:', error);
+            throw error;
+        }
+    }
+}

@@ -36,7 +36,14 @@ function UploadZone({
       }}
     >
       {uploadedImage ? (
-        <img src={uploadedImage} alt="Uploaded preview" className="uploaded-image" />
+        <motion.img
+          src={uploadedImage}
+          alt="Uploaded preview"
+          className="uploaded-image"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: dragOver ? 0 : 1 }}  // 根据 dragOver 状态控制透明度
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+        />
       ) : (
         <>
           <p>{dragOver ? "Drop it here!" : "Select a file or drag and drop here"}</p>

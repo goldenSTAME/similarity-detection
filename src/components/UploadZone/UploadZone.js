@@ -46,8 +46,8 @@ function UploadZone({
         />
       ) : (
         <>
-          <p>{dragOver ? "Drop it here!" : "Select a file or drag and drop here"}</p>
-          <p>JPG/JPEG only, file size no more than 10MB</p>
+          <p>{dragOver ? "Drop it here!" : "Select a image or drag and drop here"}</p>
+          <p>JPG/JPEG only</p>
         </>
       )}
       <label htmlFor="fileInput" className="select-file-btn">

@@ -9,16 +9,7 @@
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-.light {
-  background-color: #f5f5f5;
-  color: #333;
-}
-.dark {
-  background-color: #2c2c2c;
-  color: #eee;
-}
-
-/* 主内容 */
+/* 主内容区域 */
 .main-content {
   flex: 1;
   padding: 2rem;
@@ -33,22 +24,29 @@
   font-size: 1.4rem;
   margin-bottom: 0.5rem;
 }
+
 .main-subtitle {
   color: #666;
   margin-bottom: 2rem;
 }
 
+/* 全局变量与主题样式 */
 :root {
+  /* 主题颜色 */
   --bg-color-light: #f5f5f5;
   --text-color-light: #333;
   --bg-color-dark: #2c2c2c;
   --text-color-dark: #eee;
+
+  /* 上传组件 - 亮色主题 */
   --upload-border-color-light: #ccc;
   --upload-btn-bg-light: #1e90ff;
   --upload-btn-text-light: white;
   --upload-drag-border-light: #1e90ff;
   --upload-bg-drag-light: #e6f0fa;
   --upload-btn-bg-hover-light: #0066cc;
+
+  /* 上传组件 - 暗色主题 */
   --upload-border-color-dark: #666;
   --upload-btn-bg-dark: #4682b4;
   --upload-btn-text-dark: #eee;

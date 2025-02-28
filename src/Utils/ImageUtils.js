@@ -17,7 +17,7 @@ export class ImageUtils {
     // 将 Base64 图片上传到后端并返回处理结果
     static async uploadImage(base64Image, num = 5) {
         try {
-            const response = await fetch('http://127.0.0.1:5000/relay_image', { // 假设后端 API 地址为 /relay_image
+            const response = await fetch('http://127.0.0.1:5001/relay_image', { // 假设后端 API 地址为 /relay_image
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

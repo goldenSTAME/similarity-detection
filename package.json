@@ -5,7 +5,7 @@
   "dependencies": {
     "canvas-confetti": "^1.9.3",
     "cra-template": "1.2.0",
-    "framer-motion": "^12.4.2",
+    "framer-motion": "^12.4.7",
     "lottie-react": "^2.4.1",
     "lottie-web": "^5.12.2",
     "react": "^19.0.0",

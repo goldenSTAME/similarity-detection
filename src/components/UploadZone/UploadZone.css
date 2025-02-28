@@ -1,9 +1,10 @@
+/* 上传区域基本样式 */
 .upload-zone {
   margin: 0 auto;
   width: 100%;
   max-width: 400px; /* 限制最大宽度 */
   height: 200px;
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--upload-border-color);
   border-radius: 10px;
   text-align: center;
   padding: 20px;
@@ -11,14 +12,19 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  transition: border 0.3s ease-in-out;
+  transition: border 0.3s ease-in-out, background-color 0.3s ease-in-out;
   position: relative; /* 让子元素（如图片）居中 */
 }
 
 /* 拖拽时的高亮边框 */
 .upload-zone.drag-over {
-  border-color: #007bff;
-  /*background-color: #eef6ff;*/
+  border-color: var(--upload-drag-border);
+  background-color: var(--upload-bg-drag);
+}
+
+/* 拖拽时隐藏文字和其他子元素 */
+.upload-zone.drag-over > * {
+  opacity: 0; /* 隐藏所有直接子元素 */
 }
 
 /* 选择按钮 */
@@ -26,16 +32,22 @@
   display: inline-block;
   margin-top: 10px;
   padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
+  background-color: var(--upload-btn-bg);
+  color: var(--upload-btn-text);
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease-in-out; /* 添加 transform 过渡 */
 }
 
 .select-file-btn:hover {
-  background-color: #0056b3;
+  background-color: var(--upload-btn-bg-hover);
+}
+
+/* 拖拽时按钮的动画效果 */
+.upload-zone.drag-over .select-file-btn {
+  opacity: 0;
+  transform: scale(0.9); /* 轻微缩放效果 */
 }
 
 /* 预览上传的图片 */
@@ -50,4 +62,21 @@
 /* 隐藏默认的文件输入框 */
 input[type="file"] {
   display: none;
+}
+
+/* 拖拽提示文字 */
+.upload-zone.drag-over::before {
+  content: "Drop it here!";
+  position: absolute;
+  font-size: 16px;
+  color: var(--upload-drag-border); /* 使用拖拽边框颜色，确保可见 */
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out; /* 添加渐变动画 */
+}
+
+/* 未拖拽时隐藏伪元素 */
+.upload-zone::before {
+  content: "";
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out; /* 未拖拽时的渐变动画 */
 }

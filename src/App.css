@@ -1,7 +1,6 @@
 /* App.css */
 
 /* 基本布局 */
-/* App.css */
 .app-container {
   display: flex;
   min-height: 100vh;
@@ -24,9 +23,9 @@
   flex: 1;
   padding: 2rem;
   box-sizing: border-box;
-  margin-left: 220px; /* 留出侧边栏的空间，宽度根据 Sidebar.css 调整 */
-  height: 100vh; /* 确保高度占满视口 */
-  overflow: auto; /* 允许主内容独立滚动 */
+  margin-left: 220px;
+  height: 100vh;
+  overflow: auto;
 }
 
 /* 标题和副标题 */
@@ -44,13 +43,38 @@
   --text-color-light: #333;
   --bg-color-dark: #2c2c2c;
   --text-color-dark: #eee;
+  --upload-border-color-light: #ccc;
+  --upload-btn-bg-light: #1e90ff;
+  --upload-btn-text-light: white;
+  --upload-drag-border-light: #1e90ff;
+  --upload-bg-drag-light: #e6f0fa;
+  --upload-btn-bg-hover-light: #0066cc;
+  --upload-border-color-dark: #666;
+  --upload-btn-bg-dark: #4682b4;
+  --upload-btn-text-dark: #eee;
+  --upload-drag-border-dark: #87cefa;
+  --upload-bg-drag-dark: #3a3a3a;
+  --upload-btn-bg-hover-dark: #4169e1;
 }
 
 .light {
   background-color: var(--bg-color-light);
   color: var(--text-color-light);
+  --upload-border-color: var(--upload-border-color-light);
+  --upload-btn-bg: var(--upload-btn-bg-light);
+  --upload-btn-text: var(--upload-btn-text-light);
+  --upload-drag-border: var(--upload-drag-border-light);
+  --upload-bg-drag: var(--upload-bg-drag-light);
+  --upload-btn-bg-hover: var(--upload-btn-bg-hover-light);
 }
+
 .dark {
   background-color: var(--bg-color-dark);
   color: var(--text-color-dark);
+  --upload-border-color: var(--upload-border-color-dark);
+  --upload-btn-bg: var(--upload-btn-bg-dark);
+  --upload-btn-text: var(--upload-btn-text-dark);
+  --upload-drag-border: var(--upload-drag-border-dark);
+  --upload-bg-drag: var(--upload-bg-drag-dark);
+  --upload-btn-bg-hover: var(--upload-btn-bg-hover-dark);
 }

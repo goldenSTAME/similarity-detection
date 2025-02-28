@@ -24,6 +24,9 @@
   flex: 1;
   padding: 2rem;
   box-sizing: border-box;
+  margin-left: 220px; /* 留出侧边栏的空间，宽度根据 Sidebar.css 调整 */
+  height: 100vh; /* 确保高度占满视口 */
+  overflow: auto; /* 允许主内容独立滚动 */
 }
 
 /* 标题和副标题 */

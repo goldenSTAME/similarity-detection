@@ -1,5 +1,8 @@
 /* ========== Sidebar 基本布局 ========== */
 .sidebar {
+  position: fixed;  /* 固定侧边栏位置 */
+  top: 0;          /* 定位到视口顶部 */
+  left: 0;         /* 定位到视口左侧 */
   width: 220px;
   height: 100vh;
   display: flex;

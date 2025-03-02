@@ -25,16 +25,16 @@ button {
     cursor: pointer;
 }
 
-.response {
-    width: 100%; /* 自适应父容器 */
-    max-width: 500px; /* 限制最大宽度 */
-    margin: 20px auto; /* 上下 20px，左右居中 */
-    padding: 10px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
+/*.response {*/
+/*    width: 100%; !* 自适应父容器 *!*/
+/*    max-width: 500px; !* 限制最大宽度 *!*/
+/*    margin: 20px auto; !* 上下 20px，左右居中 *!*/
+/*    padding: 10px;*/
+/*    background-color: #f9f9f9;*/
+/*    border: 1px solid #ddd;*/
+/*    border-radius: 8px;*/
+/*    max-height: 200px;*/
+/*    overflow-y: auto;*/
+/*    white-space: pre-wrap;*/
+/*    word-wrap: break-word;*/
+/*}*/

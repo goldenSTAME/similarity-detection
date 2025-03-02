@@ -1,0 +1,14 @@
+/* src/components/DetailWindow/Response.css */
+
+.response {
+    margin-top: 20px;
+    padding: 10px;
+    /*background-color: #f9f9f9;*/
+    border-radius: 10px; /* 设置圆角 */
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-style: inherit;
+}

@@ -4,7 +4,7 @@ import Create from '../../Utils/Create/Create';
 import Read from '../../Utils/Read/Read';
 import Update from '../../Utils/Update/Update';
 import Delete from '../../Utils/Delete/Delete';
-import Response from '../../Utils/Response';
+import Response from '../../Utils/Response/Response';
 import './DetailWindow.css';
 
 function DetailWindow() {

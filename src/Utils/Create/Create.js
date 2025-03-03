@@ -1,11 +1,13 @@
 // src/components/DetailWindow/Create.js
 import React, { useState } from 'react';
 import './Create.css';
+import Response from '../Response/Response'; // 引入 Response 组件
 
-function Create({ onResponse }) {
+function Create() {
     const [imageId, setImageId] = useState('');
     const [imagePath, setImagePath] = useState('');
     const [features, setFeatures] = useState('');
+    const [response, setResponse] = useState(null); // 存储 API 返回的数据
 
     const apiBaseUrl = 'http://localhost:5001/image_features';
 
@@ -16,7 +18,7 @@ function Create({ onResponse }) {
             body: JSON.stringify({ image_id: imageId, image_path: imagePath, features })
         });
         const data = await res.json();
-        onResponse(data); // 将返回的 response 传递到父组件
+        setResponse(data); // 存储 response 以传递给 Response 组件
     };
 
     return (
@@ -25,6 +27,9 @@ function Create({ onResponse }) {
             <input type="text" placeholder="Image Path" value={imagePath} onChange={e => setImagePath(e.target.value)} />
             <input type="text" placeholder="Features" value={features} onChange={e => setFeatures(e.target.value)} />
             <button onClick={handleCreate}>Create</button>
+
+            {/* 只有当 response 存在时，才渲染 Response 组件 */}
+            {response && <Response data={response} />}
         </div>
     );
 }

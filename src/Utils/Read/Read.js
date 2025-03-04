@@ -16,14 +16,14 @@ function Read() {
 
     const handleRead = async () => {
         if (!imageId.trim()) {
-            alert("请输入图片 ID");
+            alert("Image ID!");
             return;
         }
 
         try {
             const res = await fetch(`${apiBaseUrl}/${imageId}`);
             if (!res.ok) {
-                throw new Error(`请求失败: ${res.status}`);
+                throw new Error(`Request Failed: ${res.status}`);
             }
             const data = await res.json();
             setResponse(data);
@@ -56,16 +56,19 @@ function Read() {
 
     return (
         <div className="read">
-            <input type="text" placeholder="输入图片 ID" value={imageId} onChange={e => setImageId(e.target.value)} />
-            <button onClick={handleRead}>读取</button>
+            <input type="text" placeholder="Image ID" value={imageId} onChange={e => setImageId(e.target.value)} />
+            <button onClick={handleRead}>Read</button>
 
-            {error && <p className="error">错误: {error}</p>}
+            {error && <p className="error">Error: {error}</p>}
 
             {/* 将获取到的响应数据传递给 ProcessBase64 组件 */}
             {response && <ProcessBase64 response={response} />}
 
             {/* 显示 JSON 响应数据 */}
             {response && <Response data={response} />}
+
+            {/* 添加右下角 Tips */}
+            <span className="tips">Tips: The purpose of this component is to query images with a specified ID, path, or feature</span>
         </div>
     );
 }

@@ -30,6 +30,9 @@ function Create() {
 
             {/* 只有当 response 存在时，才渲染 Response 组件 */}
             {response && <Response data={response} />}
+
+            {/* 添加右下角 Tips */}
+            <span className="tips">Tips: The purpose of this component is to establish the path and ID for the newly entered dataset image</span>
         </div>
     );
 }

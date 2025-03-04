@@ -30,6 +30,9 @@ function Update() {
 
             {/* 只有当 response 存在时，才渲染 Response 组件 */}
             {response && <Response data={response} />}
+
+            {/* 添加右下角 Tips */}
+            <span className="tips">Tips: The purpose of this component is to update the ID and path of a dataset image (must be updated at the same time)</span>
         </div>
     );
 }

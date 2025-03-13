@@ -60,6 +60,13 @@
 .menu-item.active {
   border-left-color: #CC0808;
   background-color: rgba(0, 0, 0, 0.1);
+  transition: border-left-color 0.5s ease;
+}
+
+.dark-mode .menu-item.active {
+  border-left-color: #FF3333; /* 更亮的红色 */
+  background-color: rgba(255, 255, 255, 0.3);
+  transition: border-left-color 0.5s ease;
 }
 
 /* hover 状态 */
@@ -118,4 +125,11 @@
   height: 100%;
   background: radial-gradient(ellipse 15px 50% at left center, rgba(0,0,0,0.05), transparent);
   pointer-events: none;
+}
+
+/* 深色模式阴影样式：使用浅色渐变 */
+.sidebar.dark-mode::after {
+  right: 0;  /* 调整阴影向右偏移量 */
+  width: 20px;   /* 阴影的位置 */
+  background: radial-gradient(ellipse 15px 50% at right center, rgba(0,0,0,0.2), transparent);
 }

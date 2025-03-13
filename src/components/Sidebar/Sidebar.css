@@ -14,6 +14,7 @@
   background-color: inherit;
   color: inherit;
 }
+
 /* 头部 Logo */
 .logo-container {
   width: 90%;
@@ -105,4 +106,16 @@
 .light-lottie circle {
   stroke: #121212 !important;
   fill: #121212 !important;
+}
+
+/* 阴影从中间向上下淡出 */
+.sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -20px;  /* 调整阴影向右偏移量 */
+  width: 20px;   /* 阴影的位置 */
+  height: 100%;
+  background: radial-gradient(ellipse 15px 50% at left center, rgba(0,0,0,0.05), transparent);
+  pointer-events: none;
 }

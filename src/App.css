@@ -12,9 +12,9 @@
 /* 主内容区域 */
 .main-content {
   flex: 1;
+  margin-left: 280px;
   padding: 2rem;
   box-sizing: border-box;
-  margin-left: 220px;
   height: 100vh;
   overflow: auto;
 }

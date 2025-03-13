@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-// 保留 react-lottie 导入（未使用，注释化）
-import Lottie from "react-lottie";
-// 保留 lottie-web 导入（使用中）
 import lottie from "lottie-web";
-import selectImageAnimation from "../animations/selectImage.json";
-import historyAnimation from "../animations/history.json";
-import detailsAnimation from "../animations/details.json";
-import logsAnimation from "../animations/logs.json";
+import selectImageAnimation from "../../animations/selectImage.json";
+import historyAnimation from "../../animations/history.json";
+import detailsAnimation from "../../animations/details.json";
+import logsAnimation from "../../animations/logs.json";
+// 导入主题切换按钮组件
+import ThemeToggle from "../ThemeToggle/ThemeToggle";
+// 导入 logo 的 webm 文件（建议放在 src/assets/videos/logo.webm）
+import logoVideo from "../../assets/videos/logo.webm";
+// 保留原有 CSS 引入
 import "./Sidebar.css";
 
 const menuItems = [
@@ -75,18 +76,10 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     };
   }, []);
 
-  // 主题切换逻辑
-  const handleThemeClick = (isDarkTarget) => {
-    if (isDark !== isDarkTarget) toggleTheme();
-  };
-
+  // 图标动画变量
   const iconVariants = {
     initial: { rotate: 0, scale: 1 },
     active: { rotate: 15, scale: 1.1 },
-  };
-
-  const sliderAnimation = {
-    x: isDark ? 90 : 0,
   };
 
   const handleItemClick = (itemName) => {
@@ -178,10 +171,20 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
 
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
+      {/* 头部 Logo，使用 video 播放 webm */}
       <div className="sidebar-header">
-        <div className="logo-placeholder"></div>
+        <div className="logo-container">
+          <video
+            className="logo-video"
+            src={logoVideo}
+            autoPlay
+            loop
+            muted
+          />
+        </div>
       </div>
 
+      {/* 菜单区域 */}
       <nav className="sidebar-menu">
         <ul className="menu-list">
           {menuItems.map((item) => (
@@ -225,109 +228,8 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
         </ul>
       </nav>
 
-      <div className="sidebar-footer">
-        <div className="segment-control-outer">
-          <div className="segment-control">
-            <motion.div
-              className="slider"
-              initial={false}
-              animate={sliderAnimation}
-              transition={{ type: "spring", stiffness: 150, damping: 20 }}
-            />
-
-            <motion.button
-              className={`segment-button ${!isDark ? "active" : ""}`}
-              onClick={() => handleThemeClick(false)}
-            >
-              <motion.span
-                className="button-text"
-                animate={{ scale: !isDark ? 1.05 : 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <motion.svg
-                  key="light"
-                  className="icon-svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                  animate={!isDark ? "active" : "initial"}
-                  variants={iconVariants}
-                  transition={{ duration: 0.3 }}
-                >
-                  <circle cx="12" cy="12" r="6" />
-                  <motion.g
-                    animate={!isDark ? "active" : "initial"}
-                    variants={{
-                      initial: { opacity: 0 },
-                      active: { opacity: 1 },
-                    }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" strokeWidth="2" />
-                    <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" strokeWidth="2" />
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" strokeWidth="2" />
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" strokeWidth="2" />
-                    <line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" strokeWidth="2" />
-                    <line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" strokeWidth="2" />
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" strokeWidth="2" />
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" strokeWidth="2" />
-                  </motion.g>
-                </motion.svg>
-                Light
-              </motion.span>
-            </motion.button>
-
-            <motion.button
-              className={`segment-button ${isDark ? "active" : ""}`}
-              onClick={() => handleThemeClick(true)}
-            >
-              <motion.span
-                className="button-text"
-                animate={{ scale: isDark ? 1.05 : 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <motion.svg
-                  key="dark"
-                  className="icon-svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                  animate={isDark ? "active" : "initial"}
-                  variants={iconVariants}
-                  transition={{ duration: 0.3 }}
-                >
-                  <defs>
-                    <mask id="moonMask" maskUnits="userSpaceOnUse">
-                      <rect x="0" y="0" width="24" height="24" fill="white" />
-                      <motion.circle
-                        className="mask-circle"
-                        initial={{ cx: 10, cy: 0, r: 0 }}
-                        animate={
-                          isDark
-                            ? { cx: 17, cy: 7, r: 6 }
-                            : { cx: 13, cy: 5, r: 0 }
-                        }
-                        transition={{ duration: 0.3 }}
-                        fill="black"
-                      />
-                    </mask>
-                  </defs>
-                  <motion.circle
-                    cx="12"
-                    cy="12"
-                    fill="currentColor"
-                    mask="url(#moonMask)"
-                    initial={{ r: 6 }}
-                    animate={isDark ? { r: 9 } : { r: 6 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </motion.svg>
-                Dark
-              </motion.span>
-            </motion.button>
-          </div>
-        </div>
-      </div>
+      {/* 主题切换按钮 - 独立组件 */}
+      <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
     </aside>
   );
 }

@@ -11,7 +11,7 @@ function Delete() {
 
     const handleDelete = async () => {
         if (!imageId.trim()) {
-            alert("请输入图片 ID");
+            alert("Image ID!");
             return;
         }
 
@@ -21,7 +21,7 @@ function Delete() {
             });
 
             if (!res.ok) {
-                throw new Error(`删除失败: ${res.status}`);
+                throw new Error(`Delete Failed: ${res.status}`);
             }
 
             const data = await res.json();
@@ -37,17 +37,20 @@ function Delete() {
         <div className="delete">
             <input
                 type="text"
-                placeholder="请输入图片 ID"
+                placeholder="Image ID"
                 value={imageId}
                 onChange={e => setImageId(e.target.value)}
             />
-            <button onClick={handleDelete}>删除</button>
+            <button onClick={handleDelete}>Delete</button>
 
             {/* 使用 Response 组件来显示返回数据 */}
             {response && <Response data={response} />}
 
             {/* 显示错误消息 */}
-            {error && <p className="error-message">错误: {error}</p>}
+            {error && <p className="error-message">Error: {error}</p>}
+
+            {/* 添加右下角 Tips */}
+            <span className="tips">Tips: The purpose of this component is to delete images from a data set with a specific ID</span>
         </div>
     );
 }

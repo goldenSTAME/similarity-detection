@@ -1,6 +1,7 @@
 /* src/components/DetailWindow/Update.css */
 
 .update {
+    position: relative; /* 让子元素相对这个容器定位 */
     margin: 20px 0;
     border: 2px solid #ccc; /* 边框颜色和宽度 */
     border-radius: 10px; /* 设置圆角 */
@@ -19,4 +20,14 @@
     padding: 10px 20px;
     margin: 10px;
     cursor: pointer;
+}
+
+/* 右下角 Tips 样式 */
+.update .tips {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 12px;
+    color: #888; /* 让提示信息颜色稍浅 */
+    font-style: italic;
 }

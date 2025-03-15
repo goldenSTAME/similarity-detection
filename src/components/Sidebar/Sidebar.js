@@ -6,8 +6,11 @@ import detailsAnimation from "../../animations/details.json";
 import logsAnimation from "../../animations/logs.json";
 // 导入主题切换按钮组件
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
-// 导入 logo 的 webm 文件（建议放在 src/assets/videos/logo.webm）
-import logoVideo from "../../assets/videos/logo.webm";
+// 导入 logo 的 APNG 文件（支持 alpha 的动画，需浏览器支持 APNG）
+import logoApng from "../../assets/images/logo.apng";
+// 导入带有 alpha 的 fallback 图片（用于不支持 APNG 的情况）
+import fallbackImage from "../../assets/images/logo_fallback.png";
+
 // 保留原有 CSS 引入
 import "./Sidebar.css";
 
@@ -28,6 +31,9 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
     "Logs": false,
   });
 
+  // 用于检测浏览器是否支持 APNG
+  const [apngSupported, setApngSupported] = useState(false);
+
   const lottieRefs = useRef({
     "Select Image": null,
     "History": null,
@@ -45,6 +51,26 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
       "Logs": logsAnimation.op - 1,
     },
   });
+
+  // 检测 APNG 支持情况
+  useEffect(() => {
+    function checkAPNGSupport(callback) {
+      const img = new Image();
+      img.onload = function () {
+        // 如果加载成功，就认为支持 APNG
+        callback(true);
+      };
+      img.onerror = function () {
+        callback(false);
+      };
+      // 使用一个小尺寸的 APNG data URI（有效的 APNG 数据）
+      img.src =
+        "data:image/apng;base64,AAACAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAGAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAP//AAD//wAA";
+    }
+    checkAPNGSupport((supported) => {
+      setApngSupported(supported);
+    });
+  }, []);
 
   // 在组件挂载时加载动画（使用 lottie-web）
   useEffect(() => {
@@ -171,16 +197,14 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
 
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
-      {/* 头部 Logo，使用 video 播放 webm */}
+      {/* 头部 Logo，使用 APNG 动画或 fallback 图片 */}
       <div className="sidebar-header">
         <div className="logo-container">
-          <video
-            className="logo-video"
-            src={logoVideo}
-            autoPlay
-            loop
-            muted
-          />
+          {apngSupported ? (
+            <img className="logo-video" src={logoApng} alt="Logo with alpha" />
+          ) : (
+            <img className="logo-video" src={fallbackImage} alt="Fallback Logo" />
+          )}
         </div>
       </div>
 

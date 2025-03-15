@@ -211,43 +211,29 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
       {/* 菜单区域 */}
       <nav className="sidebar-menu">
         <ul className="menu-list">
-          {menuItems.map((item) => (
-            <li
-              key={item.name}
-              className={`menu-item ${activeWindow === item.name ? "active" : ""}`}
-              onClick={() => handleItemClick(item.name)}
-              onMouseDown={() => item.animation && handleItemMouseDown(item.name)}
-              // 原有的 mouseUp 和 mouseLeave 事件，注释化以便后续恢复
-              /*
-              onMouseUp={() => item.animation && handleItemMouseUp(item.name)}
-              onMouseLeave={() => item.animation && handleItemMouseUp(item.name)}
-              */
-            >
-              {item.animation && (
-                <div
-                  id={`lottie-${item.name}`}
-                  className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}
-                  style={{ width: 24, height: 24 }}
-                />
-              )}
-              {/* 恢复使用 react-lottie's Lottie 组件，避免引用未定义变量 */}
-              {/*{item.animation && (*/}
-              {/*  <div className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}>*/}
-              {/*    <Lottie*/}
-              {/*      ref={(ref) => (lottieRefs.current[item.name] = ref)}*/}
-              {/*      options={{ animationData: item.animation, loop: false, autoplay: false }} // 静态值*/}
-              {/*      height={24}*/}
-              {/*      width={24}*/}
-              {/*      isPaused={!isLottiePlaying[item.name]}*/}
-              {/*      eventListeners={[{*/}
-              {/*        eventName: "complete",*/}
-              {/*        callback: () => {} // 空回调避免引用未定义变量*/}
-              {/*      }]}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*)}*/}
-              <span>{item.name}</span>
-            </li>
+          {menuItems.map((item, index) => (
+            <React.Fragment key={item.name}>
+              <li
+                className={`menu-item ${activeWindow === item.name ? "active" : ""}`}
+                onClick={() => handleItemClick(item.name)}
+                onMouseDown={() => item.animation && handleItemMouseDown(item.name)}
+                // 原有的 mouseUp 和 mouseLeave 事件，注释化以便后续恢复
+                /*
+                onMouseUp={() => item.animation && handleItemMouseUp(item.name)}
+                onMouseLeave={() => item.animation && handleItemMouseUp(item.name)}
+                */
+              >
+                {item.animation && (
+                  <div
+                    id={`lottie-${item.name}`}
+                    className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}
+                    style={{ width: 24, height: 24 }}
+                  />
+                )}
+                <span>{item.name}</span>
+              </li>
+              {index === 3 && <div className="menu-divider" />}
+            </React.Fragment>
           ))}
         </ul>
       </nav>

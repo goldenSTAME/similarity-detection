@@ -115,21 +115,50 @@
   fill: #121212 !important;
 }
 
-/* 阴影从中间向上下淡出 */
-.sidebar::after {
+/* 使用两个伪元素分别处理 light 和 dark 阴影，实现平滑淡入淡出 */
+.sidebar::after,
+.sidebar::before {
   content: "";
   position: absolute;
   top: 0;
-  right: -20px;  /* 调整阴影向右偏移量 */
-  width: 20px;   /* 阴影的位置 */
+  width: 20px;   /* 阴影的宽度 */
   height: 100%;
-  background: radial-gradient(ellipse 15px 50% at left center, rgba(0,0,0,0.05), transparent);
   pointer-events: none;
+  transition: opacity 0.5s ease, right 0.5s ease;
 }
 
-/* 深色模式阴影样式：使用浅色渐变 */
-.sidebar.dark-mode::after {
-  right: 0;  /* 调整阴影向右偏移量 */
-  width: 20px;   /* 阴影的位置 */
+/* 浅色模式下的阴影（默认显示） */
+.sidebar::after {
+  right: -20px;  /* 浅色模式时向右偏移 */
+  background: radial-gradient(ellipse 15px 50% at left center, rgba(0,0,0,0.05), transparent);
+  opacity: 1;
+}
+
+/* 深色模式下的阴影（默认隐藏） */
+.sidebar::before {
+  right: 0;  /* 深色模式阴影的位置 */
   background: radial-gradient(ellipse 15px 50% at right center, rgba(0,0,0,0.2), transparent);
+  opacity: 0;
+}
+
+/* 切换到深色模式时，隐藏浅色阴影，显示深色阴影 */
+.sidebar.dark-mode::after {
+  opacity: 0;
+}
+
+.sidebar.dark-mode::before {
+  opacity: 1;
+}
+
+/* 分隔线 */
+.menu-divider {
+  width: 90%;
+  border-top: 1px solid;
+  border-top-color: rgba(0, 0, 0, 0.2); /* 浅色模式下的颜色 */
+  margin: 20px auto;  /* 上下各留出足够的空隙，大概一个按钮的高度 */
+  transition: border-top-color 0.5s ease;
+}
+
+.dark-mode .menu-divider {
+  border-top-color: rgba(255, 255, 255, 0.2); /* 深色模式下的颜色 */
 }

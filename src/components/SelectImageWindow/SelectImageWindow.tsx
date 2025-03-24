@@ -93,13 +93,7 @@ function SelectImageWindow() {
   };
 
   return (
-      <div
-          className="select-image-window"
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          style={{ border: dragOver ? '2px dashed #000' : '2px solid transparent' }}
-      >
+      <div className="select-image-window">
         <h2>Select Image</h2>
         <UploadZone
             dragOver={dragOver}
@@ -107,14 +101,8 @@ function SelectImageWindow() {
             handleDragLeave={handleDragLeave}
             handleDrop={handleDrop}
             handleFileChange={handleFileChange}
-            uploadedImage={imagePreview} // 传递Base64预览
+            uploadedImage={imagePreview}
         />
-        {/*{imagePreview && (*/}
-        {/*    <div>*/}
-        {/*      <h3>Preview:</h3>*/}
-        {/*      <img src={imagePreview} alt="Selected" style={{ maxWidth: '200px' }} />*/}
-        {/*    </div>*/}
-        {/*)}*/}
         <button
             onClick={handleSearch}
             disabled={isLoading}

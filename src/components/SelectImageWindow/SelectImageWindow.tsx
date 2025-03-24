@@ -4,6 +4,7 @@ import './SelectImageWindow.css';
 import UploadZone from "../UploadZone/UploadZone";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import SimilarImagesGallery from "./SimilarityImagesComponent";
 
 interface ImageData {
   id: string;
@@ -103,6 +104,7 @@ function SelectImageWindow() {
             handleFileChange={handleFileChange}
             uploadedImage={imagePreview}
         />
+
         <button
             onClick={handleSearch}
             disabled={isLoading}
@@ -110,21 +112,17 @@ function SelectImageWindow() {
         >
           {isLoading ? 'Searching...' : 'Search'}
         </button>
-        <div className="similar-images">
-          {!searched ? (
-              <p>Please upload and search an image.</p>
-          ) : similarImages.length > 0 ? (
-              similarImages.map((imageData, index) => (
-                  <div key={index} className="image-item">
-                    <h4>ID: {imageData.id}</h4>
-                    <h5>相似度: {imageData.similarity.toFixed(4)}</h5>
-                    <img src={`data:image/png;base64,${imageData.processed_image_base64}`} alt={imageData.id} />
-                  </div>
-              ))
-          ) : (
-              <p>No similar images found.</p>
-          )}
-        </div>
+
+        {/* Only show gallery when we have results */}
+        {similarImages.length > 0 && (
+            <SimilarImagesGallery images={similarImages} />
+        )}
+
+        {/* Show a message when we've searched but no images were found */}
+        {searched && similarImages.length === 0 && (
+            <p className="no-results-message">No similar images found.</p>
+        )}
+
         <ToastContainer />
       </div>
   );

@@ -1,9 +1,19 @@
+/* 主容器样式 */
 .select-image-window {
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 92vh;
   padding: 20px;
   text-align: center;
+  box-sizing: border-box;
 }
 
+/* 内容区域，正常流中排列 */
+.content {
+  flex: 1;
+}
+
+/* 搜索结果部分 */
 .similar-images {
   margin-top: 20px;
 }
@@ -55,4 +65,37 @@ button.loading::after {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* 分割线样式 */
+.divider {
+  margin: 10px 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+/* 底部操作区域 */
+.action-section {
+  padding: 0 20px;
+}
+
+/* 操作按钮内部布局，右对齐 */
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Cancel 文本样式，无按钮形状 */
+.cancel-text {
+  font-size: 16px;
+  cursor: pointer;
+  color: #007bff;
+  user-select: none;
+}
+
+.cancel-text.disabled {
+  cursor: default;
+  color: #aaa;
 }

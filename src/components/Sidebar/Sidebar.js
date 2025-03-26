@@ -6,9 +6,10 @@ import detailsAnimation from "../../animations/details.json";
 import logsAnimation from "../../animations/logs.json";
 // 导入主题切换按钮组件
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
+
 // 导入 logo 的 APNG 文件（支持 alpha 的动画，需浏览器支持 APNG）
 import logoApng from "../../assets/images/logo.apng";
-// 导入带有 alpha 的 fallback 图片（用于不支持 APNG 的情况）
+// 导入带有 alpha 的 fallback 图片（默认显示这张 PNG）
 import fallbackImage from "../../assets/images/logo_fallback.png";
 
 // 保留原有 CSS 引入
@@ -33,6 +34,12 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
 
   // 用于检测浏览器是否支持 APNG
   const [apngSupported, setApngSupported] = useState(false);
+
+  // 标记当前是否在播放 APNG（8 秒时长内）
+  const [showApng, setShowApng] = useState(false);
+
+  // 8秒播放的定时器引用
+  const apngTimerRef = useRef(null);
 
   const lottieRefs = useRef({
     "Select Image": null,
@@ -94,11 +101,13 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
       }
     });
 
-    // 组件卸载时清理动画实例
+    // 组件卸载时清理动画实例 & 定时器
     return () => {
       Object.values(lottieRefs.current).forEach((anim) => {
         if (anim) anim.destroy();
       });
+      // 新增：清理 8 秒定时器
+      clearTimeout(apngTimerRef.current);
     };
   }, []);
 
@@ -195,14 +204,47 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
   };
   */
 
+  // 鼠标移入时立即切换APNG并播放8秒，即使鼠标离开也不停止
+  const handleMouseEnterLogo = () => {
+    if (!apngSupported) return; // 不支持 APNG，就一直显示fallback
+
+    // 如果已经在8秒播放中，就不再重复触发
+    if (showApng) {
+      console.log("APNG 已在播放中，忽略再次触发");
+      return;
+    }
+
+    console.log("开始 8 秒 APNG 播放");
+    setShowApng(true);
+
+    // 8 秒后自动还原
+    apngTimerRef.current = setTimeout(() => {
+      console.log("8 秒结束，切回 fallback PNG");
+      setShowApng(false);
+    }, 8000);
+  };
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
       {/* 头部 Logo，使用 APNG 动画或 fallback 图片 */}
       <div className="sidebar-header">
         <div className="logo-container">
           {apngSupported ? (
-            <img className="logo-video" src={logoApng} alt="Logo with alpha" />
+            showApng ? (
+              <img
+                className="logo-video"
+                src={logoApng}
+                alt="APNG Logo"
+              />
+            ) : (
+              <img
+                className="logo-video"
+                src={fallbackImage}
+                alt="Fallback Logo"
+                onMouseEnter={handleMouseEnterLogo}
+              />
+            )
           ) : (
+            // 不支持 APNG，则一直是 fallback
             <img className="logo-video" src={fallbackImage} alt="Fallback Logo" />
           )}
         </div>
@@ -214,9 +256,13 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
           {menuItems.map((item, index) => (
             <React.Fragment key={item.name}>
               <li
-                className={`menu-item ${activeWindow === item.name ? "active" : ""}`}
+                className={`menu-item ${
+                  activeWindow === item.name ? "active" : ""
+                }`}
                 onClick={() => handleItemClick(item.name)}
-                onMouseDown={() => item.animation && handleItemMouseDown(item.name)}
+                onMouseDown={() =>
+                  item.animation && handleItemMouseDown(item.name)
+                }
                 // 原有的 mouseUp 和 mouseLeave 事件，注释化以便后续恢复
                 /*
                 onMouseUp={() => item.animation && handleItemMouseUp(item.name)}
@@ -226,7 +272,9 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
                 {item.animation && (
                   <div
                     id={`lottie-${item.name}`}
-                    className={`lottie-container ${isDark ? "dark-lottie" : "light-lottie"}`}
+                    className={`lottie-container ${
+                      isDark ? "dark-lottie" : "light-lottie"
+                    }`}
                     style={{ width: 24, height: 24 }}
                   />
                 )}

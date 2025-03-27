@@ -1,4 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Lottie from 'lottie-react';
+import pleaseWaitAnimation from '../../animations/pleasewait.json';
 import { ImageUtils } from '../../Utils/ImageUtils';
 import './SelectImageWindow.css';
 import UploadZone from "../UploadZone/UploadZone";
@@ -23,27 +26,40 @@ interface ActionSectionProps {
 
 const ActionSection: React.FC<ActionSectionProps> = ({ isLoading, handleCancel, handleSearch }) => {
   return (
-    <div className="action-section">
-      {/* 分割线：用于分隔搜索结果与操作区域 */}
-      <hr className="divider" />
+    <motion.div
+      className="action-section"
+      layout
+      transition={{ duration: 0.3 }}
+    >
+      <motion.hr
+        className="divider"
+        layout
+        transition={{ duration: 0.3 }}
+      />
       <div className="action-buttons">
-        {/* Cancel 文本控件：搜索进行时可点击，否则禁用 */}
-        <span
+        <motion.span
+          key="cancel"
           className={`cancel-text ${isLoading ? 'active' : 'disabled'}`}
           onClick={isLoading ? handleCancel : undefined}
+          layout
+          transition={{ duration: 0.3 }}
+          whileHover={{ scale: isLoading ? 1.05 : 1 }}
         >
           Cancel
-        </span>
-        {/* Search 按钮：搜索进行中显示 Searching... 并禁用按钮 */}
-        <button
+        </motion.span>
+        <motion.button
+          key="search"
           onClick={handleSearch}
           disabled={isLoading}
           className={isLoading ? 'loading' : ''}
+          layout
+          transition={{ duration: 0.3 }}
+          whileHover={{ scale: !isLoading ? 1.05 : 1 }}
         >
           {isLoading ? 'Searching...' : 'Search'}
-        </button>
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -56,9 +72,24 @@ function SelectImageWindow() {
   const [dragOver, setDragOver] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  // 用于自动滚动的引用
+  const contentRef = useRef<HTMLDivElement>(null);
+  const animationContainerRef = useRef<HTMLDivElement>(null);
+
   // 使用 useRef 保存取消标记
   // TODO: 如果后端更新后实现真实取消接口，请删除前端 cancelRequestRef 相关代码
   const cancelRequestRef = useRef(false);
+
+  // 根据 isLoading 状态自动滚动
+  useEffect(() => {
+    if (isLoading && animationContainerRef.current) {
+      // 搜索时自动滚动到动画区域
+      animationContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (!isLoading && contentRef.current) {
+      // 搜索完成或取消后，自动滚动到内容顶部
+      contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [isLoading]);
 
   // 处理拖拽进入事件
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -163,7 +194,7 @@ function SelectImageWindow() {
 
   return (
     <div className="select-image-window">
-      <div className="content">
+      <div ref={contentRef} className="content">
         <h2>Select Image</h2>
         <UploadZone
           dragOver={dragOver}
@@ -174,15 +205,59 @@ function SelectImageWindow() {
           uploadedImage={imagePreview}
         />
 
-        {/* 显示搜索结果 */}
-        {similarImages.length > 0 && (
-          <SimilarImagesGallery images={similarImages} />
-        )}
+        {/* 根据 isLoading 状态决定是否固定动画容器高度 */}
+        <div ref={animationContainerRef} className={`animation-container ${isLoading ? 'fixed-height' : ''}`}>
+          {/* Lottie加载动画，采用绝对定位包装 */}
+          <AnimatePresence mode={"wait"}>
+            {isLoading && (
+              <motion.div
+                key="lottie"
+                className="lottie-wrapper"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Lottie
+                  animationData={pleaseWaitAnimation}
+                  loop={true}
+                  className="please-wait-lottie"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {/* 搜索后无结果提示 */}
-        {searched && similarImages.length === 0 && (
-          <p className="no-results-message">No similar images found.</p>
-        )}
+          {/* 显示搜索结果 */}
+          <AnimatePresence mode={"wait"}>
+            {!isLoading && similarImages.length > 0 && (
+              <motion.div
+                key="results"
+                initial={{ x: "100%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: "100%", opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <SimilarImagesGallery images={similarImages} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 搜索后无结果提示 */}
+          <AnimatePresence mode={"wait"}>
+            {!isLoading && searched && similarImages.length === 0 && (
+              <motion.p
+                key="noResults"
+                initial={{ x: "100%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: "100%", opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="no-results-message"
+              >
+                No similar images found.
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* 底部操作区域组件：分割线与按钮组合在一起 */}

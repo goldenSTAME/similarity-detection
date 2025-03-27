@@ -13,8 +13,7 @@ interface ImageData {
   processed_image_base64: string;
 }
 
-// 底部操作区域组件，包含分割线和操作按钮（Search 与 Cancel）
-// 注意：Cancel 功能目前采用前端模拟取消逻辑，后续后端更新后可删除部分前端取消代码
+// 底部操作区域组件
 interface ActionSectionProps {
   isLoading: boolean;
   handleCancel: () => void;
@@ -23,27 +22,24 @@ interface ActionSectionProps {
 
 const ActionSection: React.FC<ActionSectionProps> = ({ isLoading, handleCancel, handleSearch }) => {
   return (
-    <div className="action-section">
-      {/* 分割线：用于分隔搜索结果与操作区域 */}
-      <hr className="divider" />
-      <div className="action-buttons">
-        {/* Cancel 文本控件：搜索进行时可点击，否则禁用 */}
+      <div className="action-section">
+        <hr className="divider" />
+        <div className="action-buttons">
         <span
-          className={`cancel-text ${isLoading ? 'active' : 'disabled'}`}
-          onClick={isLoading ? handleCancel : undefined}
+            className={`cancel-text ${isLoading ? 'active' : 'disabled'}`}
+            onClick={isLoading ? handleCancel : undefined}
         >
           Cancel
         </span>
-        {/* Search 按钮：搜索进行中显示 Searching... 并禁用按钮 */}
-        <button
-          onClick={handleSearch}
-          disabled={isLoading}
-          className={isLoading ? 'loading' : ''}
-        >
-          {isLoading ? 'Searching...' : 'Search'}
-        </button>
+          <button
+              onClick={handleSearch}
+              disabled={isLoading}
+              className={isLoading ? 'loading' : ''}
+          >
+            {isLoading ? 'Searching...' : 'Search'}
+          </button>
+        </div>
       </div>
-    </div>
   );
 };
 
@@ -56,9 +52,8 @@ function SelectImageWindow() {
   const [dragOver, setDragOver] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // 使用 useRef 保存取消标记
-  // TODO: 如果后端更新后实现真实取消接口，请删除前端 cancelRequestRef 相关代码
-  const cancelRequestRef = useRef(false);
+  // AbortController 引用
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // 处理拖拽进入事件
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -97,7 +92,7 @@ function SelectImageWindow() {
     setImage(file);
     try {
       const base64 = await ImageUtils.fileToBase64(file);
-      console.log("Base64 preview image:", base64);
+      console.log("Base64 preview image:", base64.substring(0, 50) + "...");
       setImagePreview(base64);
     } catch (error) {
       console.error("File conversion failed:", error);
@@ -105,50 +100,55 @@ function SelectImageWindow() {
     }
   };
 
-  // 处理搜索动作：增加取消标记判断，如果在搜索过程中点击 Cancel，则不更新搜索结果
+  // 处理搜索动作：使用 AbortController 支持取消请求
   const handleSearch = async () => {
     if (!image) {
       toast.warn("Please select an image first!");
       return;
     }
-    // 每次搜索前重置取消标记
-    cancelRequestRef.current = false;
+
+    // 创建新的 AbortController
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     setIsLoading(true);
+    setSimilarImages([]);
+    setSearched(false);
+
     try {
       const base64Image = await ImageUtils.fileToBase64(image);
-      // TODO: 当后端实现取消请求后，删除下面这段取消检查代码
-      if (cancelRequestRef.current) return;
-      console.log('Uploaded image Base64:', base64Image);
-      const results: ImageData[] = await ImageUtils.uploadImage(base64Image, numResults);
-      // TODO: 当后端实现取消请求后，删除下面这段取消检查代码
-      if (cancelRequestRef.current) return;
+      console.log('Starting image search...');
+
+      // 传递 AbortSignal 到 uploadImage 方法
+      const results = await ImageUtils.uploadImage(base64Image, numResults, signal);
+
+      // 如果请求成功完成
       setSimilarImages(results);
       setSearched(true);
-    } catch (error) {
-      // 若未取消，处理错误
-      if (!cancelRequestRef.current) {
-        console.error("Image upload failed:", error);
-        setSimilarImages([]);
+      toast.success("Search completed successfully!");
+    } catch (error: any) {
+      // 处理各种错误情况
+      if (error.message === '请求已取消') {
+        toast.info("Search cancelled");
+      } else {
+        console.error("Image search failed:", error);
+        toast.error("Search failed: " + (error.message || "Unknown error"));
         setSearched(true);
-        toast.error("Image upload failed!");
       }
     } finally {
-      if (!cancelRequestRef.current) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
-  // 处理取消搜索动作：设置取消标记并清空正在加载状态
+  // 处理取消搜索动作：使用 AbortController 取消请求
   const handleCancel = () => {
-    if (!isLoading) return;
-    // 设置取消标记，前端模拟取消请求（后端实现后请移除此逻辑）
-    cancelRequestRef.current = true;
-    setIsLoading(false);
-    // 根据需求决定是否清空已显示的搜索结果
-    setSimilarImages([]);
-    setSearched(false);
-    toast.info("Search cancelled");
+    if (!isLoading || !abortControllerRef.current) return;
+
+    // 取消网络请求
+    abortControllerRef.current.abort();
+
+    // UI 状态更新会在请求的 catch 块中处理
   };
 
   // 校验文件类型（仅支持 JPG/JPEG）
@@ -162,38 +162,38 @@ function SelectImageWindow() {
   };
 
   return (
-    <div className="select-image-window">
-      <div className="content">
-        <h2>Select Image</h2>
-        <UploadZone
-          dragOver={dragOver}
-          handleDragOver={handleDragOver}
-          handleDragLeave={handleDragLeave}
-          handleDrop={handleDrop}
-          handleFileChange={handleFileChange}
-          uploadedImage={imagePreview}
+      <div className="select-image-window">
+        <div className="content">
+          <h2>Select Image</h2>
+          <UploadZone
+              dragOver={dragOver}
+              handleDragOver={handleDragOver}
+              handleDragLeave={handleDragLeave}
+              handleDrop={handleDrop}
+              handleFileChange={handleFileChange}
+              uploadedImage={imagePreview}
+          />
+
+          {/* 显示搜索结果 */}
+          {similarImages.length > 0 && (
+              <SimilarImagesGallery images={similarImages} />
+          )}
+
+          {/* 搜索后无结果提示 */}
+          {searched && similarImages.length === 0 && (
+              <p className="no-results-message">No similar images found.</p>
+          )}
+        </div>
+
+        {/* 底部操作区域组件 */}
+        <ActionSection
+            isLoading={isLoading}
+            handleCancel={handleCancel}
+            handleSearch={handleSearch}
         />
 
-        {/* 显示搜索结果 */}
-        {similarImages.length > 0 && (
-          <SimilarImagesGallery images={similarImages} />
-        )}
-
-        {/* 搜索后无结果提示 */}
-        {searched && similarImages.length === 0 && (
-          <p className="no-results-message">No similar images found.</p>
-        )}
+        <ToastContainer />
       </div>
-
-      {/* 底部操作区域组件：分割线与按钮组合在一起 */}
-      <ActionSection
-        isLoading={isLoading}
-        handleCancel={handleCancel}
-        handleSearch={handleSearch}
-      />
-
-      <ToastContainer />
-    </div>
   );
 }
 

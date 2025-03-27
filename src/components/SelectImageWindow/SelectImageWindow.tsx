@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Lottie from 'lottie-react';
+import pleaseWaitAnimation from '../../animations/pleasewait.json';
 import { ImageUtils } from '../../Utils/ImageUtils';
 import './SelectImageWindow.css';
 import UploadZone from "../UploadZone/UploadZone";
@@ -6,71 +9,59 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SimilarImagesGallery from "./SimilarityImagesComponent";
 
-// Define image data interface
+// 定义图片数据接口
 interface ImageData {
   id: string;
   similarity: number;
   processed_image_base64: string;
 }
 
-// Define loading states as an enum
-enum LoadingState {
-  IDLE = 'idle',
-  CONVERTING = 'converting',
-  EXTRACTING = 'extracting',
-  SEARCHING = 'searching',
-  FETCHING = 'fetching',
-  CANCELLED = 'cancelled',
-  ERROR = 'error'
-}
-
-// Bottom action section component
+// 底部操作区域组件，包含分割线和操作按钮（Search 与 Cancel）
+// 注意：Cancel 功能目前采用前端模拟取消逻辑，后续后端更新后可删除部分前端取消代码
 interface ActionSectionProps {
   isLoading: boolean;
-  loadingState: LoadingState;
   handleCancel: () => void;
   handleSearch: () => void;
-  progressMessage: string;
 }
 
-const ActionSection: React.FC<ActionSectionProps> = (
-    {
-      isLoading,
-      loadingState,
-      handleCancel,
-      handleSearch,
-      progressMessage
-    }) =>
-{
-  // Get appropriate button text based on state
-  const getButtonText = () => {
-    if (!isLoading) return "Search";
-
-    return "Processing...";
-  };
-
+const ActionSection: React.FC<ActionSectionProps> = ({ isLoading, handleCancel, handleSearch }) => {
   return (
-      <div className="action-section">
-        <hr className="divider" />
-        <div className="action-buttons">
-          <button
-              onClick={handleSearch}
-              disabled={isLoading}
-              className={`search-action-button ${isLoading ? 'loading' : ''}`}
-          >
-            {getButtonText()}
-          </button>
-          <span
-              className={`cancel-text ${isLoading ? 'active' : 'disabled'}`}
-              onClick={isLoading ? handleCancel : undefined}
-          >
-            Cancel
-          </span>
-        </div>
+    <motion.div
+      className="action-section"
+      layout
+      transition={{ duration: 0.3 }}
+    >
+      <motion.hr
+        className="divider"
+        layout
+        transition={{ duration: 0.3 }}
+      />
+      <div className="action-buttons">
+        <motion.span
+          key="cancel"
+          className={`cancel-text ${isLoading ? 'active' : 'disabled'}`}
+          onClick={isLoading ? handleCancel : undefined}
+          layout
+          transition={{ duration: 0.3 }}
+          whileHover={{ scale: isLoading ? 1.05 : 1 }}
+        >
+          Cancel
+        </motion.span>
+        <motion.button
+          key="search"
+          onClick={handleSearch}
+          disabled={isLoading}
+          className={isLoading ? 'loading' : ''}
+          layout
+          transition={{ duration: 0.3 }}
+          whileHover={{ scale: !isLoading ? 1.05 : 1 }}
+        >
+          {isLoading ? 'Searching...' : 'Search'}
+        </motion.button>
       </div>
+    </motion.div>
   );
 };
-
 
 function SelectImageWindow() {
   const [image, setImage] = useState<File | null>(null);
@@ -80,50 +71,39 @@ function SelectImageWindow() {
   const [searched, setSearched] = useState<boolean>(false);
   const [dragOver, setDragOver] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.IDLE);
-  const [progressMessage, setProgressMessage] = useState<string>('');
 
-  // AbortController reference
-  const abortControllerRef = useRef<AbortController | null>(null);
+  // 用于自动滚动的引用
+  const contentRef = useRef<HTMLDivElement>(null);
+  const animationContainerRef = useRef<HTMLDivElement>(null);
 
-  // Progress message timeout reference
-  const progressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // 使用 useRef 保存取消标记
+  // TODO: 如果后端更新后实现真实取消接口，请删除前端 cancelRequestRef 相关代码
+  const cancelRequestRef = useRef(false);
 
-  // Update progress message with a slight delay
-  const updateProgressWithDelay = (message: string) => {
-    // Clear existing timeout
-    if (progressTimeoutRef.current) {
-      clearTimeout(progressTimeoutRef.current);
-    }
-
-    // Set after a short delay to avoid flickering
-    progressTimeoutRef.current = setTimeout(() => {
-      setProgressMessage(message);
-    }, 100);
-  };
-
-  // Cleanup progress message timeout on unmount
+  // 根据 isLoading 状态自动滚动
   useEffect(() => {
-    return () => {
-      if (progressTimeoutRef.current) {
-        clearTimeout(progressTimeoutRef.current);
-      }
-    };
-  }, []);
+    if (isLoading && animationContainerRef.current) {
+      // 搜索时自动滚动到动画区域
+      animationContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (!isLoading && contentRef.current) {
+      // 搜索完成或取消后，自动滚动到内容顶部
+      contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [isLoading]);
 
-  // Handle drag over event
+  // 处理拖拽进入事件
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(true);
   };
 
-  // Handle drag leave event
+  // 处理拖拽离开事件
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(false);
   };
 
-  // Handle file drop event
+  // 处理拖拽释放文件事件
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(false);
@@ -133,7 +113,7 @@ function SelectImageWindow() {
     }
   };
 
-  // Handle file input change event
+  // 处理文件选择事件
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -142,12 +122,13 @@ function SelectImageWindow() {
     }
   };
 
-  // Process file: convert to Base64 and set preview
+  // 文件处理函数：转换为 Base64 并设置预览
   const processFile = async (file: File) => {
     if (!validateFile(file)) return;
     setImage(file);
     try {
       const base64 = await ImageUtils.fileToBase64(file);
+      console.log("Base64 preview image:", base64);
       setImagePreview(base64);
     } catch (error) {
       console.error("File conversion failed:", error);
@@ -155,86 +136,53 @@ function SelectImageWindow() {
     }
   };
 
-  // Handle search action
+  // 处理搜索动作：增加取消标记判断，如果在搜索过程中点击 Cancel，则不更新搜索结果
   const handleSearch = async () => {
     if (!image) {
       toast.warn("Please select an image first!");
       return;
     }
-
-    // Create a new AbortController
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
-
-    // Reset state for new search
+    // 每次搜索前重置取消标记
+    cancelRequestRef.current = false;
     setIsLoading(true);
-    setLoadingState(LoadingState.CONVERTING);
-    setSimilarImages([]);
-    setSearched(false);
-    updateProgressWithDelay("Converting image...");
-
     try {
-      // Convert image to Base64
       const base64Image = await ImageUtils.fileToBase64(image);
-
-      setLoadingState(LoadingState.EXTRACTING);
-      updateProgressWithDelay("Extracting features...");
-
-      // Add a small delay to ensure the UI updates
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      setLoadingState(LoadingState.SEARCHING);
-      updateProgressWithDelay("Searching similar images...");
-
-      // Upload and search for similar images
-      const results = await ImageUtils.uploadImage(base64Image, numResults, signal);
-
-      setLoadingState(LoadingState.FETCHING);
-      updateProgressWithDelay("Loading results...");
-
-      // If search completed successfully
+      // TODO: 当后端实现取消请求后，删除下面这段取消检查代码
+      if (cancelRequestRef.current) return;
+      console.log('Uploaded image Base64:', base64Image);
+      const results: ImageData[] = await ImageUtils.uploadImage(base64Image, numResults);
+      // TODO: 当后端实现取消请求后，删除下面这段取消检查代码
+      if (cancelRequestRef.current) return;
       setSimilarImages(results);
       setSearched(true);
-      setLoadingState(LoadingState.IDLE);
-      toast.success("Search completed successfully!");
-    } catch (error: any) {
-      // Handle various error cases
-      setLoadingState(error.message === 'Request cancelled' ? LoadingState.CANCELLED : LoadingState.ERROR);
-
-      if (error.message === 'Request cancelled') {
-        toast.info("Search cancelled");
-        setProgressMessage("Cancelled");
-      } else {
-        console.error("Image search failed:", error);
-        toast.error("Search failed: " + (error.message || "Unknown error"));
-        setProgressMessage("Failed");
+    } catch (error) {
+      // 若未取消，处理错误
+      if (!cancelRequestRef.current) {
+        console.error("Image upload failed:", error);
+        setSimilarImages([]);
+        setSearched(true);
+        toast.error("Image upload failed!");
       }
-
-      setSearched(true);
     } finally {
-      setIsLoading(false);
-      // Delayed reset of loading state information
-      setTimeout(() => {
-        if (loadingState === LoadingState.CANCELLED || loadingState === LoadingState.ERROR) {
-          setLoadingState(LoadingState.IDLE);
-          setProgressMessage('');
-        }
-      }, 1500);
-      abortControllerRef.current = null;
+      if (!cancelRequestRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 
-  // Handle cancel search action
+  // 处理取消搜索动作：设置取消标记并清空正在加载状态
   const handleCancel = () => {
-    if (!isLoading || !abortControllerRef.current) return;
-
-    updateProgressWithDelay("Cancelling...");
-
-    // Cancel the request
-    abortControllerRef.current.abort();
+    if (!isLoading) return;
+    // 设置取消标记，前端模拟取消请求（后端实现后请移除此逻辑）
+    cancelRequestRef.current = true;
+    setIsLoading(false);
+    // 根据需求决定是否清空已显示的搜索结果
+    setSimilarImages([]);
+    setSearched(false);
+    toast.info("Search cancelled");
   };
 
-  // Validate file type
+  // 校验文件类型（仅支持 JPG/JPEG）
   const validateFile = (file: File): boolean => {
     const validTypes = ["image/jpeg"];
     if (!validTypes.includes(file.type)) {
@@ -245,48 +193,82 @@ function SelectImageWindow() {
   };
 
   return (
-      <div className="select-image-window">
-        <div className="content">
-          <h2>Select Image</h2>
-          <UploadZone
-              dragOver={dragOver}
-              handleDragOver={handleDragOver}
-              handleDragLeave={handleDragLeave}
-              handleDrop={handleDrop}
-              handleFileChange={handleFileChange}
-              uploadedImage={imagePreview}
-          />
-
-          {/* Show loading indicator based on state */}
-          {isLoading && (
-              <div className="loading-indicator">
-                <div className="spinner"></div>
-                <p className="loading-text">{progressMessage}</p>
-              </div>
-          )}
-
-          {/* Show search results */}
-          {similarImages.length > 0 && (
-              <SimilarImagesGallery images={similarImages} />
-          )}
-
-          {/* Search completed but no results */}
-          {searched && similarImages.length === 0 && !isLoading && (
-              <p className="no-results-message">No similar images found.</p>
-          )}
-        </div>
-
-        {/* Bottom action section */}
-        <ActionSection
-            isLoading={isLoading}
-            loadingState={loadingState}
-            handleCancel={handleCancel}
-            handleSearch={handleSearch}
-            progressMessage={progressMessage}
+    <div className="select-image-window">
+      <div ref={contentRef} className="content">
+        <h2>Select Image</h2>
+        <UploadZone
+          dragOver={dragOver}
+          handleDragOver={handleDragOver}
+          handleDragLeave={handleDragLeave}
+          handleDrop={handleDrop}
+          handleFileChange={handleFileChange}
+          uploadedImage={imagePreview}
         />
 
-        <ToastContainer />
+        {/* 根据 isLoading 状态决定是否固定动画容器高度 */}
+        <div ref={animationContainerRef} className={`animation-container ${isLoading ? 'fixed-height' : ''}`}>
+          {/* Lottie加载动画，采用绝对定位包装 */}
+          <AnimatePresence mode={"wait"}>
+            {isLoading && (
+              <motion.div
+                key="lottie"
+                className="lottie-wrapper"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Lottie
+                  animationData={pleaseWaitAnimation}
+                  loop={true}
+                  className="please-wait-lottie"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 显示搜索结果 */}
+          <AnimatePresence mode={"wait"}>
+            {!isLoading && similarImages.length > 0 && (
+              <motion.div
+                key="results"
+                initial={{ x: "100%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: "100%", opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <SimilarImagesGallery images={similarImages} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 搜索后无结果提示 */}
+          <AnimatePresence mode={"wait"}>
+            {!isLoading && searched && similarImages.length === 0 && (
+              <motion.p
+                key="noResults"
+                initial={{ x: "100%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: "100%", opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="no-results-message"
+              >
+                No similar images found.
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
+
+      {/* 底部操作区域组件：分割线与按钮组合在一起 */}
+      <ActionSection
+        isLoading={isLoading}
+        handleCancel={handleCancel}
+        handleSearch={handleSearch}
+      />
+
+      <ToastContainer />
+    </div>
   );
 }
 

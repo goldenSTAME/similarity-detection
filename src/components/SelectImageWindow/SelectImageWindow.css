@@ -119,6 +119,14 @@
   transition: opacity 0.3s, background-color 0.3s;
 }
 
+/* Button styles with fixed width to prevent size jumps */
+.select-image-window .action-buttons button {
+  padding: 8px 16px;
+  font-size: 16px;
+  min-width: 120px; /* Fixed minimum width to prevent size jumps */
+  position: relative; /* For proper spinner positioning */
+}
+
 .select-image-window button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -129,16 +137,18 @@
   position: relative;
 }
 
+/* Modified spinner to take up less horizontal space */
 .select-image-window button.loading::after {
   content: '';
   display: inline-block;
-  width: 16px;
-  height: 16px;
+  width: 14px; /* Slightly smaller spinner */
+  height: 14px;
   border: 2px solid #fff;
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
-  margin-left: 8px;
+  margin-left: 6px; /* Reduced margin */
+  vertical-align: middle;
 }
 
 @keyframes spin {
@@ -165,7 +175,7 @@
   margin: 5px 0;
 }
 
-/* Dark mode adjustments - FIXED SELECTORS FROM .dark-mode TO .dark */
+/* Dark mode adjustments - Using correct .dark selector */
 .dark .loading-text {
   color: #d0d0d0; /* Brighter text for better contrast */
 }

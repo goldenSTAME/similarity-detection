@@ -8,23 +8,13 @@ import UploadZone from "../UploadZone/UploadZone";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SimilarImagesGallery from "./SimilarityImagesComponent";
+import ProgressTracker, { LoadingState } from './ProgressTracker';
 
 // Define image data interface
 interface ImageData {
   id: string;
   similarity: number;
   processed_image_base64: string;
-}
-
-// Define loading states as an enum
-enum LoadingState {
-  IDLE = 'idle',
-  CONVERTING = 'converting',
-  EXTRACTING = 'extracting',
-  SEARCHING = 'searching',
-  FETCHING = 'fetching',
-  CANCELLED = 'cancelled',
-  ERROR = 'error'
 }
 
 // Bottom action section component
@@ -89,6 +79,7 @@ function SelectImageWindow() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.IDLE);
   const [progressMessage, setProgressMessage] = useState<string>('');
+  const [showLottie, setShowLottie] = useState<boolean>(true);
 
   // References for scrolling and animation
   const contentRef = useRef<HTMLDivElement>(null);
@@ -109,6 +100,11 @@ function SelectImageWindow() {
     progressTimeoutRef.current = setTimeout(() => {
       setProgressMessage(message);
     }, 100);
+  };
+
+  // Toggle between Lottie and Progress Tracker
+  const toggleVisualizer = () => {
+    setShowLottie(!showLottie);
   };
 
   // Cleanup progress message timeout on unmount
@@ -272,11 +268,34 @@ function SelectImageWindow() {
           uploadedImage={imagePreview}
         />
 
+        {/* Visualization Toggle */}
+        {isLoading && (
+          <div className="visualizer-toggle">
+            <button
+              onClick={toggleVisualizer}
+              className="toggle-button"
+            >
+              {showLottie ? "Show Progress Tracker" : "Show Animation"}
+            </button>
+          </div>
+        )}
+
         {/* Animation and Results Container */}
         <div ref={animationContainerRef} className={`animation-container ${isLoading ? 'fixed-height' : ''}`}>
+          {/* Progress Tracker (new component) */}
+          <AnimatePresence mode="wait">
+            {isLoading && !showLottie && (
+              <ProgressTracker
+                currentState={loadingState}
+                progressMessage={progressMessage}
+                isLoading={isLoading}
+              />
+            )}
+          </AnimatePresence>
+
           {/* Lottie Loading Animation */}
           <AnimatePresence mode="wait">
-            {isLoading && (
+            {isLoading && showLottie && (
               <motion.div
                 key="lottie"
                 className="lottie-wrapper"

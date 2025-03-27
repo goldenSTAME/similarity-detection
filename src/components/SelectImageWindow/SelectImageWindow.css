@@ -21,7 +21,7 @@
 }
 
 .animation-container.fixed-height {
-  height: 320px;
+  min-height: 320px;
   overflow: hidden;
 }
 
@@ -60,7 +60,40 @@
   color: #666;
 }
 
-/* Remaining styles from the original CSS remain unchanged */
+/* Toggle button for visualizer */
+.visualizer-toggle {
+  margin: 20px auto;
+  text-align: center;
+}
+
+.toggle-button {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #333;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.toggle-button:hover {
+  background-color: #e0e0e0;
+}
+
+.dark-mode .toggle-button {
+  background-color: #444;
+  border-color: #555;
+  color: #eee;
+}
+
+.dark-mode .toggle-button:hover {
+  background-color: #555;
+}
+
+/* Bottom action section */
 .action-section {
   padding: 0 20px;
 }
@@ -78,6 +111,7 @@
   gap: 16px;
 }
 
+/* Cancel text styling */
 .cancel-text {
   font-size: 16px;
   cursor: pointer;
@@ -96,6 +130,7 @@
   opacity: 0.5;
 }
 
+/* Button styles */
 button {
   padding: 8px 16px;
   font-size: 16px;
@@ -151,4 +186,37 @@ button.loading::after {
 .image-item h4,
 .image-item h5 {
   margin: 5px 0;
+}
+
+/* Dark mode adjustments */
+.dark-mode .loading-text {
+  color: #aaa;
+}
+
+.dark-mode .no-results-message {
+  color: #aaa;
+}
+
+.dark-mode .divider {
+  border-top-color: #444;
+}
+
+.dark-mode button {
+  background-color: #4682b4;
+}
+
+.dark-mode button.loading {
+  background-color: #555;
+}
+
+.dark-mode .cancel-text {
+  color: #4682b4;
+}
+
+.dark-mode .cancel-text.active {
+  color: #ff6b6b;
+}
+
+.dark-mode .cancel-text.disabled {
+  color: #666;
 }

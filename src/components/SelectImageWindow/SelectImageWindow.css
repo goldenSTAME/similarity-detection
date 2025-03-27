@@ -1,70 +1,144 @@
-/* 按钮样式优化 - 增强版 */
+/* 主容器样式 */
+.select-image-window {
+  display: flex;
+  flex-direction: column;
+  min-height: 92vh;
+  padding: 20px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* 内容区域，正常流中排列 */
+.content {
+  flex: 1;
+}
+
+/* 搜索结果部分 */
+.similar-images {
+  margin-top: 20px;
+}
+
+.image-item {
+  margin-bottom: 20px;
+}
+
+.image-item img {
+  max-width: 200px;
+  height: auto;
+}
+
+.image-item h4,
+.image-item h5 {
+  margin: 5px 0;
+}
+
+/* 按钮样式优化 */
 button {
-  padding: 8px 20px;
-  font-size: 16px;
   cursor: pointer;
-  background-color: #007bff;
-  color: white;
   border: none;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s;
+  color: #FFF;
+  text-align: center;
+
+  font-family: Montserrat, sans-serif;
+  font-size: 16px;
+  font-style: normal;
   font-weight: 500;
-  letter-spacing: 0.3px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  line-height: 24px;
+
+  display: flex;
+  width: 268px;
+  padding: 12px 32px;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  border-radius: 6px;
+  background: #1880FF;
 }
 
-/* 悬停效果 */
-button:hover:not(:disabled) {
-  background-color: #0069d9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* 点击效果 */
-button:active:not(:disabled) {
-  transform: translateY(1px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* 禁用状态 */
 button:disabled {
-  opacity: 0.65;
+  opacity: 0.5;
   cursor: not-allowed;
-  box-shadow: none;
 }
 
-/* 加载状态的特殊样式 */
-button.loading {
-  background-color: #6c757d;
-  position: relative;
-  transition: background-color 0.3s ease;
+/* 分割线样式 */
+.divider {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin-bottom: 20px;
 }
 
-button.loading:hover {
-  background-color: #5a6268;
-  transform: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* 底部操作区域 */
+.action-section {
+  padding: 0 20px;
 }
 
-/* Cancel 按钮的样式优化 */
+/* 操作按钮内部布局，右对齐 */
+.action-buttons {
+  flex-direction: column;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Cancel 文本样式，无按钮形状 */
 .cancel-text {
+  font-family: Montserrat, sans-serif;
   font-size: 16px;
   cursor: pointer;
   color: #007bff;
   user-select: none;
-  transition: all 0.2s ease;
-  padding: 6px 12px;
-  border-radius: 4px;
 }
 
+.cancel-text.disabled {
+  cursor: default;
+  color: #aaa;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 20px;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #007bff;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Improve Cancel text styling */
 .cancel-text.active {
+  opacity: 1;
   color: #dc3545;
+  cursor: pointer;
   font-weight: 500;
 }
 
 .cancel-text.active:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-  color: #bd2130;
+  text-decoration: underline;
 }
 
 .cancel-text.disabled {
@@ -73,25 +147,7 @@ button.loading:hover {
   color: #6c757d;
 }
 
-/* 底部操作区域美化 */
-.action-section {
-  padding: 0 20px;
-  margin-top: 20px;
-}
-
-/* 分割线样式增强 */
-.divider {
-  margin: 15px 0;
-  border: none;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.1), transparent);
-}
-
-/* 操作按钮布局优化 */
-.action-buttons {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 0;
+button.loading {
+  background-color: #6c757d;
+  position: relative;
 }

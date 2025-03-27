@@ -46,30 +46,31 @@ const ActionSection: React.FC<ActionSectionProps> = (
   const getButtonText = () => {
     if (!isLoading) return "Search";
 
-    return progressMessage || "Processing...";
+    return "Processing...";
   };
 
   return (
       <div className="action-section">
         <hr className="divider" />
         <div className="action-buttons">
-        <span
-            className={`cancel-text ${isLoading ? 'active' : 'disabled'}`}
-            onClick={isLoading ? handleCancel : undefined}
-        >
-          Cancel
-        </span>
           <button
               onClick={handleSearch}
               disabled={isLoading}
-              className={isLoading ? 'loading' : ''}
+              className={`search-action-button ${isLoading ? 'loading' : ''}`}
           >
             {getButtonText()}
           </button>
+          <span
+              className={`cancel-text ${isLoading ? 'active' : 'disabled'}`}
+              onClick={isLoading ? handleCancel : undefined}
+          >
+            Cancel
+          </span>
         </div>
       </div>
   );
 };
+
 
 function SelectImageWindow() {
   const [image, setImage] = useState<File | null>(null);

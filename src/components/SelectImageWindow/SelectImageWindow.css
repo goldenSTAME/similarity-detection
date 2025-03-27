@@ -18,15 +18,19 @@
 .animation-container {
   position: relative;
   margin-top: 20px;
+  min-height: 320px; /* Minimum height when empty */
 }
 
 .animation-container.fixed-height {
-  min-height: 320px;
+  min-height: 380px; /* Increased for loading state */
   overflow: hidden;
 }
 
-/* Absolute positioned Lottie wrapper */
-.lottie-wrapper {
+/* Wrapper containers for clean animations */
+.lottie-wrapper,
+.progress-wrapper,
+.results-wrapper,
+.no-results-wrapper {
   position: absolute;
   top: 0;
   left: 0;
@@ -37,22 +41,20 @@
   align-items: center;
 }
 
+/* Fixed absolute positioning for Progress Tracker to appear below Lottie */
+.progress-wrapper {
+  top: 220px; /* Position below the Lottie animation */
+  z-index: 5;
+}
+
 /* Crop and center Lottie animation */
 .please-wait-lottie {
   width: 300px;
-  height: 200px;
+  height: 150px;
   object-fit: cover;
   object-position: center;
-  transform: scale(2); /* Zoom to crop out white spaces */
+  transform: scale(2.5); /* Zoom to crop out white spaces */
   clip-path: circle(40%); /* Optional: crop to circular shape if needed */
-}
-
-.loading-text {
-  position: relative;
-  z-index: 10;
-  margin-top: 10px;
-  font-size: 16px;
-  color: #666;
 }
 
 .no-results-message {
@@ -189,10 +191,6 @@ button.loading::after {
 }
 
 /* Dark mode adjustments */
-.dark-mode .loading-text {
-  color: #aaa;
-}
-
 .dark-mode .no-results-message {
   color: #aaa;
 }

@@ -79,7 +79,6 @@ function SelectImageWindow() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.IDLE);
   const [progressMessage, setProgressMessage] = useState<string>('');
-  const [showLottie, setShowLottie] = useState<boolean>(true);
 
   // References for scrolling and animation
   const contentRef = useRef<HTMLDivElement>(null);
@@ -100,11 +99,6 @@ function SelectImageWindow() {
     progressTimeoutRef.current = setTimeout(() => {
       setProgressMessage(message);
     }, 100);
-  };
-
-  // Toggle between Lottie and Progress Tracker
-  const toggleVisualizer = () => {
-    setShowLottie(!showLottie);
   };
 
   // Cleanup progress message timeout on unmount
@@ -268,34 +262,13 @@ function SelectImageWindow() {
           uploadedImage={imagePreview}
         />
 
-        {/* Visualization Toggle */}
-        {isLoading && (
-          <div className="visualizer-toggle">
-            <button
-              onClick={toggleVisualizer}
-              className="toggle-button"
-            >
-              {showLottie ? "Show Progress Tracker" : "Show Animation"}
-            </button>
-          </div>
-        )}
-
-        {/* Animation and Results Container */}
+        {/* Animation and Results Container - Using absolute positioning for animations */}
         <div ref={animationContainerRef} className={`animation-container ${isLoading ? 'fixed-height' : ''}`}>
-          {/* Progress Tracker (new component) */}
-          <AnimatePresence mode="wait">
-            {isLoading && !showLottie && (
-              <ProgressTracker
-                currentState={loadingState}
-                progressMessage={progressMessage}
-                isLoading={isLoading}
-              />
-            )}
-          </AnimatePresence>
+          {/* Animation blocks are absolutely positioned for clean exit/enter transitions */}
 
-          {/* Lottie Loading Animation */}
+          {/* Lottie Animation */}
           <AnimatePresence mode="wait">
-            {isLoading && showLottie && (
+            {isLoading && (
               <motion.div
                 key="lottie"
                 className="lottie-wrapper"
@@ -309,7 +282,29 @@ function SelectImageWindow() {
                   loop={true}
                   className="please-wait-lottie"
                 />
+
+                {/* Keep the loading text here */}
                 <p className="loading-text">{progressMessage}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Progress Tracker - For stage visual indicators */}
+          <AnimatePresence mode="wait">
+            {isLoading && (
+              <motion.div
+                key="progress"
+                className="progress-wrapper"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ProgressTracker
+                  currentState={loadingState}
+                  progressMessage={progressMessage}
+                  isLoading={isLoading}
+                />
               </motion.div>
             )}
           </AnimatePresence>
@@ -319,9 +314,10 @@ function SelectImageWindow() {
             {!isLoading && similarImages.length > 0 && (
               <motion.div
                 key="results"
-                initial={{ x: "100%", opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: "100%", opacity: 0 }}
+                className="results-wrapper"
+                initial={{ opacity: 0, x: "100%" }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: "100%" }}
                 transition={{ duration: 0.3 }}
               >
                 <SimilarImagesGallery images={similarImages} />
@@ -332,16 +328,18 @@ function SelectImageWindow() {
           {/* No Results Message */}
           <AnimatePresence mode="wait">
             {!isLoading && searched && similarImages.length === 0 && (
-              <motion.p
+              <motion.div
                 key="noResults"
-                initial={{ x: "100%", opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: "100%", opacity: 0 }}
+                className="no-results-wrapper"
+                initial={{ opacity: 0, x: "100%" }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: "100%" }}
                 transition={{ duration: 0.3 }}
-                className="no-results-message"
               >
-                No similar images found.
-              </motion.p>
+                <p className="no-results-message">
+                  No similar images found.
+                </p>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

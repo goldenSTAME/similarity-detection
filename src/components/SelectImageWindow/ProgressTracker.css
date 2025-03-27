@@ -4,13 +4,7 @@
   margin: 30px auto;
   padding: 20px;
   border-radius: 12px;
-  /* Removed background-color and box-shadow for transparency */
   transition: all 0.3s ease;
-}
-
-/* Dark mode doesn't need a background setting anymore */
-.dark-mode .progress-tracker {
-  /* Removed background-color and box-shadow */
 }
 
 .progress-steps {
@@ -170,23 +164,90 @@
   animation: pulse 2s infinite;
 }
 
-/* Dark mode adjustments */
-.dark-mode .step-indicator {
-  background-color: #444;
+/* Dark mode adjustments - FIXED SELECTORS FROM .dark-mode TO .dark */
+.dark .step-indicator {
+  background-color: #2a2a2a;
+  border-color: #3a3a3a;
 }
 
-.dark-mode .step-connector {
-  background-color: #444;
+.dark .step-connector {
+  background-color: #3a3a3a;
 }
 
-.dark-mode .progress-message {
-  color: #aaa;
+.dark .step-indicator.active {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.3);
 }
 
-.dark-mode .error-message {
+.dark .step-indicator.completed {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.dark .step-indicator.error {
+  background-color: #dc3545;
+  border-color: #bb2d3b;
+}
+
+.dark .step-indicator.cancelled {
+  background-color: #5c636a;
+  border-color: #565e64;
+}
+
+.dark .step-connector.completed {
+  background-color: #198754;
+}
+
+.dark .progress-message {
+  color: #d0d0d0;
+}
+
+.dark .error-message {
   color: #ff6b6b;
 }
 
-.dark-mode .step-label {
-  color: #aaa;
+.dark .cancelled-message {
+  color: #adb5bd;
+}
+
+.dark .status-message {
+  color: #6ea8fe;
+}
+
+.dark .step-label {
+  color: #adb5bd;
+}
+
+.dark .step-label.active {
+  color: #6ea8fe;
+}
+
+.dark .step-label.completed {
+  color: #75b798;
+}
+
+.dark .step-label.error {
+  color: #ea868f;
+}
+
+.dark .step-label.cancelled {
+  color: #adb5bd;
+}
+
+/* Dark mode animation */
+@keyframes dark-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}
+
+.dark .step-indicator.active {
+  animation: dark-pulse 2s infinite;
 }

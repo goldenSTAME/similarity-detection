@@ -57,6 +57,14 @@
   clip-path: circle(40%); /* Optional: crop to circular shape if needed */
 }
 
+.loading-text {
+  position: relative;
+  z-index: 10;
+  margin-top: 10px;
+  font-size: 16px;
+  color: #666;
+}
+
 .no-results-message {
   font-size: 18px;
   color: #666;
@@ -132,8 +140,8 @@
   opacity: 0.5;
 }
 
-/* Button styles */
-button {
+/* Button styles - SCOPED to select-image-window to avoid affecting other components */
+.select-image-window button {
   padding: 8px 16px;
   font-size: 16px;
   cursor: pointer;
@@ -144,17 +152,17 @@ button {
   transition: opacity 0.3s, background-color 0.3s;
 }
 
-button:disabled {
+.select-image-window button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-button.loading {
+.select-image-window button.loading {
   background-color: #6c757d;
   position: relative;
 }
 
-button.loading::after {
+.select-image-window button.loading::after {
   content: '';
   display: inline-block;
   width: 16px;
@@ -191,6 +199,10 @@ button.loading::after {
 }
 
 /* Dark mode adjustments */
+.dark-mode .loading-text {
+  color: #aaa;
+}
+
 .dark-mode .no-results-message {
   color: #aaa;
 }
@@ -199,11 +211,11 @@ button.loading::after {
   border-top-color: #444;
 }
 
-.dark-mode button {
+.dark-mode .select-image-window button {
   background-color: #4682b4;
 }
 
-.dark-mode button.loading {
+.dark-mode .select-image-window button.loading {
   background-color: #555;
 }
 

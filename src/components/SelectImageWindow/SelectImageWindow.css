@@ -49,24 +49,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-button.loading::after {
-  content: '';
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid #fff;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  margin-left: 8px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* 分割线样式 */
 .divider {
   margin: 10px 0;
@@ -99,8 +81,6 @@ button.loading::after {
   cursor: default;
   color: #aaa;
 }
-
-/* Add this to src/components/SelectImageWindow/SelectImageWindow.css */
 
 .loading-indicator {
   display: flex;
@@ -153,23 +133,7 @@ button.loading::after {
   color: #6c757d;
 }
 
-/* Modify button styles in loading state */
 button.loading {
   background-color: #6c757d;
   position: relative;
-  padding-right: 40px; /* Make space for spinner */
-}
-
-button.loading::after {
-  content: '';
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
 }

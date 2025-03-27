@@ -33,13 +33,15 @@ interface ActionSectionProps {
   progressMessage: string;
 }
 
-const ActionSection: React.FC<ActionSectionProps> = ({
-                                                       isLoading,
-                                                       loadingState,
-                                                       handleCancel,
-                                                       handleSearch,
-                                                       progressMessage
-                                                     }) => {
+const ActionSection: React.FC<ActionSectionProps> = (
+    {
+      isLoading,
+      loadingState,
+      handleCancel,
+      handleSearch,
+      progressMessage
+    }) =>
+{
   // Get appropriate button text based on state
   const getButtonText = () => {
     if (!isLoading) return "Search";

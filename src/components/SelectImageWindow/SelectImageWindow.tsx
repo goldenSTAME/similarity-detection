@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ImageUtils } from '../../Utils/ImageUtils';
 import './SelectImageWindow.css';
 import UploadZone from "../UploadZone/UploadZone";
@@ -6,21 +6,47 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SimilarImagesGallery from "./SimilarityImagesComponent";
 
-// 定义图片数据接口
+// Define image data interface
 interface ImageData {
   id: string;
   similarity: number;
   processed_image_base64: string;
 }
 
-// 底部操作区域组件
-interface ActionSectionProps {
-  isLoading: boolean;
-  handleCancel: () => void;
-  handleSearch: () => void;
+// Define loading states as an enum
+enum LoadingState {
+  IDLE = 'idle',
+  CONVERTING = 'converting',
+  EXTRACTING = 'extracting',
+  SEARCHING = 'searching',
+  FETCHING = 'fetching',
+  CANCELLED = 'cancelled',
+  ERROR = 'error'
 }
 
-const ActionSection: React.FC<ActionSectionProps> = ({ isLoading, handleCancel, handleSearch }) => {
+// Bottom action section component
+interface ActionSectionProps {
+  isLoading: boolean;
+  loadingState: LoadingState;
+  handleCancel: () => void;
+  handleSearch: () => void;
+  progressMessage: string;
+}
+
+const ActionSection: React.FC<ActionSectionProps> = ({
+                                                       isLoading,
+                                                       loadingState,
+                                                       handleCancel,
+                                                       handleSearch,
+                                                       progressMessage
+                                                     }) => {
+  // Get appropriate button text based on state
+  const getButtonText = () => {
+    if (!isLoading) return "Search";
+
+    return progressMessage || "Processing...";
+  };
+
   return (
       <div className="action-section">
         <hr className="divider" />
@@ -36,7 +62,7 @@ const ActionSection: React.FC<ActionSectionProps> = ({ isLoading, handleCancel, 
               disabled={isLoading}
               className={isLoading ? 'loading' : ''}
           >
-            {isLoading ? 'Searching...' : 'Search'}
+            {getButtonText()}
           </button>
         </div>
       </div>
@@ -51,23 +77,50 @@ function SelectImageWindow() {
   const [searched, setSearched] = useState<boolean>(false);
   const [dragOver, setDragOver] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.IDLE);
+  const [progressMessage, setProgressMessage] = useState<string>('');
 
-  // AbortController 引用
+  // AbortController reference
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // 处理拖拽进入事件
+  // Progress message timeout reference
+  const progressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Update progress message with a slight delay
+  const updateProgressWithDelay = (message: string) => {
+    // Clear existing timeout
+    if (progressTimeoutRef.current) {
+      clearTimeout(progressTimeoutRef.current);
+    }
+
+    // Set after a short delay to avoid flickering
+    progressTimeoutRef.current = setTimeout(() => {
+      setProgressMessage(message);
+    }, 100);
+  };
+
+  // Cleanup progress message timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (progressTimeoutRef.current) {
+        clearTimeout(progressTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle drag over event
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(true);
   };
 
-  // 处理拖拽离开事件
+  // Handle drag leave event
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(false);
   };
 
-  // 处理拖拽释放文件事件
+  // Handle file drop event
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(false);
@@ -77,7 +130,7 @@ function SelectImageWindow() {
     }
   };
 
-  // 处理文件选择事件
+  // Handle file input change event
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -86,13 +139,12 @@ function SelectImageWindow() {
     }
   };
 
-  // 文件处理函数：转换为 Base64 并设置预览
+  // Process file: convert to Base64 and set preview
   const processFile = async (file: File) => {
     if (!validateFile(file)) return;
     setImage(file);
     try {
       const base64 = await ImageUtils.fileToBase64(file);
-      console.log("Base64 preview image:", base64.substring(0, 50) + "...");
       setImagePreview(base64);
     } catch (error) {
       console.error("File conversion failed:", error);
@@ -100,58 +152,86 @@ function SelectImageWindow() {
     }
   };
 
-  // 处理搜索动作：使用 AbortController 支持取消请求
+  // Handle search action
   const handleSearch = async () => {
     if (!image) {
       toast.warn("Please select an image first!");
       return;
     }
 
-    // 创建新的 AbortController
+    // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
+    // Reset state for new search
     setIsLoading(true);
+    setLoadingState(LoadingState.CONVERTING);
     setSimilarImages([]);
     setSearched(false);
+    updateProgressWithDelay("Converting image...");
 
     try {
+      // Convert image to Base64
       const base64Image = await ImageUtils.fileToBase64(image);
-      console.log('Starting image search...');
 
-      // 传递 AbortSignal 到 uploadImage 方法
+      setLoadingState(LoadingState.EXTRACTING);
+      updateProgressWithDelay("Extracting features...");
+
+      // Add a small delay to ensure the UI updates
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      setLoadingState(LoadingState.SEARCHING);
+      updateProgressWithDelay("Searching similar images...");
+
+      // Upload and search for similar images
       const results = await ImageUtils.uploadImage(base64Image, numResults, signal);
 
-      // 如果请求成功完成
+      setLoadingState(LoadingState.FETCHING);
+      updateProgressWithDelay("Loading results...");
+
+      // If search completed successfully
       setSimilarImages(results);
       setSearched(true);
+      setLoadingState(LoadingState.IDLE);
       toast.success("Search completed successfully!");
     } catch (error: any) {
-      // 处理各种错误情况
-      if (error.message === '请求已取消') {
+      // Handle various error cases
+      setLoadingState(error.message === 'Request cancelled' ? LoadingState.CANCELLED : LoadingState.ERROR);
+
+      if (error.message === 'Request cancelled') {
         toast.info("Search cancelled");
+        setProgressMessage("Cancelled");
       } else {
         console.error("Image search failed:", error);
         toast.error("Search failed: " + (error.message || "Unknown error"));
-        setSearched(true);
+        setProgressMessage("Failed");
       }
+
+      setSearched(true);
     } finally {
       setIsLoading(false);
+      // Delayed reset of loading state information
+      setTimeout(() => {
+        if (loadingState === LoadingState.CANCELLED || loadingState === LoadingState.ERROR) {
+          setLoadingState(LoadingState.IDLE);
+          setProgressMessage('');
+        }
+      }, 1500);
       abortControllerRef.current = null;
     }
   };
 
-  // 处理取消搜索动作：使用 AbortController 取消请求
+  // Handle cancel search action
   const handleCancel = () => {
     if (!isLoading || !abortControllerRef.current) return;
 
-    // 取消网络请求
-    abortControllerRef.current.abort();
+    updateProgressWithDelay("Cancelling...");
 
-    // UI 状态更新会在请求的 catch 块中处理
+    // Cancel the request
+    abortControllerRef.current.abort();
   };
 
-  // 校验文件类型（仅支持 JPG/JPEG）
+  // Validate file type
   const validateFile = (file: File): boolean => {
     const validTypes = ["image/jpeg"];
     if (!validTypes.includes(file.type)) {
@@ -174,22 +254,32 @@ function SelectImageWindow() {
               uploadedImage={imagePreview}
           />
 
-          {/* 显示搜索结果 */}
+          {/* Show loading indicator based on state */}
+          {isLoading && (
+              <div className="loading-indicator">
+                <div className="spinner"></div>
+                <p className="loading-text">{progressMessage}</p>
+              </div>
+          )}
+
+          {/* Show search results */}
           {similarImages.length > 0 && (
               <SimilarImagesGallery images={similarImages} />
           )}
 
-          {/* 搜索后无结果提示 */}
-          {searched && similarImages.length === 0 && (
+          {/* Search completed but no results */}
+          {searched && similarImages.length === 0 && !isLoading && (
               <p className="no-results-message">No similar images found.</p>
           )}
         </div>
 
-        {/* 底部操作区域组件 */}
+        {/* Bottom action section */}
         <ActionSection
             isLoading={isLoading}
+            loadingState={loadingState}
             handleCancel={handleCancel}
             handleSearch={handleSearch}
+            progressMessage={progressMessage}
         />
 
         <ToastContainer />

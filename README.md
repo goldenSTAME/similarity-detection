@@ -1,68 +1,182 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Image Similarity Detection
 
-## Available Scripts
+A modern React application for detecting and comparing similar images using visual features extraction.
 
-In the project directory, you can run:
+![image](https://github.com/user-attachments/assets/0a9675f4-ac74-4ab0-bca8-dd95c7bca6de)
 
-### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- 🌓 Elegant light/dark mode with smooth transitions
+- 📷 Intuitive drag-and-drop image upload interface
+- 🔍 Advanced image similarity search
+- 📊 Visual progress tracking during image processing
+- 🖼️ Interactive gallery view of similar images with similarity scores
+- 📋 Complete CRUD operations for image feature management
+- 🔄 Real-time processing status updates with cancel capability
+- 📱 Responsive design for all device sizes
 
-### `npm test`
+## Table of Contents
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Endpoints](#api-endpoints)
+- [Project Structure](#project-structure)
+- [Deployment](#deployment)
+- [Technologies](#technologies)
+- [Contributing](#contributing)
+- [License](#license)
 
-### `npm run build`
+## Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Prerequisites
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Node.js (v16 or higher)
+- npm or yarn
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Setup
 
-### `npm run eject`
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/similarity-detection.git
+   cd similarity-detection
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+2. Install the dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3. Start the development server:
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+4. Open [http://localhost:3000](http://localhost:3000) to view the app in your browser.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Usage
 
-## Learn More
+### Image Upload and Search
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Navigate to the "Select Image" tab in the sidebar
+2. Either drag and drop a JPEG image onto the upload zone or click "Select Image" to browse your files
+3. Click "Search" to start the image processing and similarity search
+4. View the results in the gallery that appears below the upload area
+5. You can cancel a search in progress by clicking "Cancel"
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Feature Management
 
-### Code Splitting
+1. Navigate to the "Details" tab in the sidebar
+2. Use the CRUD interface to:
+   - Create new image feature entries
+   - Read existing image features
+   - Update image features
+   - Delete image features
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Theme Switching
 
-### Analyzing the Bundle Size
+- Toggle between light and dark mode using the theme switcher at the bottom of the sidebar
+- Your preference will be saved and remembered between sessions
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## API Endpoints
 
-### Making a Progressive Web App
+The application connects to a backend service with the following endpoints:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Image Processing
 
-### Advanced Configuration
+- `POST http://127.0.0.1:5001/relay_image`
+  - Uploads an image and retrieves similar images
+  - Accepts a base64-encoded image and number of results to return
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- `POST http://127.0.0.1:5001/cancel_request/:requestId`
+  - Cancels an ongoing image processing request
 
-### Deployment
+- `GET http://127.0.0.1:5001/request_status/recent`
+  - Gets status information about recent requests
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- `POST http://127.0.0.1:5001/cleanup_requests`
+  - Cleans up old or stalled requests
 
-### `npm run build` fails to minify
+### Feature Management
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- `POST http://localhost:5001/image_features`
+  - Creates a new image feature entry
+
+- `GET http://localhost:5001/image_features/:id`
+  - Retrieves features for a specific image
+
+- `PUT http://localhost:5001/image_features/:id`
+  - Updates an image feature entry
+
+- `DELETE http://localhost:5001/image_features/:id`
+  - Deletes an image feature entry
+
+## Project Structure
+
+```
+similarity-detection/
+├── public/                 # Static files
+├── src/
+│   ├── animations/         # Lottie animation files
+│   ├── assets/             # Images and other assets
+│   ├── components/         # React components
+│   │   ├── DetailWindow/   # Feature management interface
+│   │   ├── SelectImageWindow/ # Image upload and search interface
+│   │   ├── Sidebar/        # Navigation sidebar
+│   │   ├── ThemeToggle/    # Theme switching component
+│   │   └── UploadZone/     # Drag and drop upload area
+│   ├── Utils/              # Utility functions and components
+│   │   ├── Create/         # Create feature component
+│   │   ├── Delete/         # Delete feature component
+│   │   ├── Read/           # Read feature component
+│   │   ├── Response/       # API response display component
+│   │   ├── Update/         # Update feature component
+│   │   ├── ImageUtils.ts   # Image processing utilities
+│   │   └── ProcessBase64.js # Base64 image processing
+│   ├── App.js              # Main application component
+│   ├── App.css             # Global styles
+│   └── index.js            # Application entry point
+├── .github/                # GitHub workflows
+├── package.json            # Dependencies and scripts
+└── tsconfig.json           # TypeScript configuration
+```
+
+## Deployment
+
+This project is configured for easy deployment to Vercel using GitHub Actions.
+
+1. Fork this repository
+2. Set up a Vercel account and link your repository
+3. Add your `VERCEL_TOKEN` to your GitHub repository secrets
+4. Push to the main branch to trigger an automatic deployment
+
+## Technologies
+
+- **Frontend Framework**: React 19
+- **Language**: JavaScript/TypeScript
+- **UI/UX**:
+  - Framer Motion for animations
+  - Lottie for complex animations
+  - React Toastify for notifications
+- **State Management**: React Hooks
+- **API Handling**: Fetch API
+- **Build Tool**: Create React App
+- **Deployment**: Vercel with GitHub Actions
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

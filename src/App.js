@@ -1,7 +1,9 @@
+// src/App.js (modifications only)
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SelectImageWindow from "./components/SelectImageWindow/SelectImageWindow";
-import  DetailWindow from "./components/DetailWindow/DetailWindow";
+import DetailWindow from "./components/DetailWindow/DetailWindow";
+import HistoryWindow from "./components/HistoryWindow/HistoryWindow"; // Add import
 import "./App.css";
 
 function App() {
@@ -30,6 +32,8 @@ const [activeWindow, setActiveWindow] = useState("Select Image");
     switch (activeWindow) {
       case "Select Image":
         return <SelectImageWindow />;
+      case "History":
+        return <HistoryWindow />;
       case "Details":
         return <DetailWindow />;
       // 其他窗口例如 History、Details 等可在此处添加对应组件

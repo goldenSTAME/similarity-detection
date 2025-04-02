@@ -4,7 +4,7 @@ import SimilarImagesGallery from "../SelectImageWindow/SimilarityImagesComponent
 import './HistoryWindow.css';
 
 // Define the interface for history item data
-interface HistoricalSearch {
+export interface HistoricalSearch {
   id: string;
   timestamp: number;
   imageName: string;
@@ -17,42 +17,72 @@ interface HistoricalSearch {
   thumbnailBase64: string; // Base64 of the uploaded image thumbnail
 }
 
-// Mock data for development
-const mockHistoryData: HistoricalSearch[] = [
-  {
-    id: '1',
-    timestamp: Date.now() - 3600000, // 1 hour ago
-    imageName: 'blue_dress.jpg',
-    highestSimilarity: 0.92,
-    searchResults: [
-      { id: '123', similarity: 0.92, processed_image_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' },
-      { id: '124', similarity: 0.85, processed_image_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' },
-    ],
-    thumbnailBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
-  },
-  {
-    id: '2',
-    timestamp: Date.now() - 7200000, // 2 hours ago
-    imageName: 'red_shirt.jpg',
-    highestSimilarity: 0.78,
-    searchResults: [
-      { id: '223', similarity: 0.78, processed_image_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' },
-      { id: '224', similarity: 0.65, processed_image_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' },
-    ],
-    thumbnailBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
-  },
-  {
-    id: '3',
-    timestamp: Date.now() - 86400000, // 1 day ago
-    imageName: 'black_pants.jpg',
-    highestSimilarity: 0.89,
-    searchResults: [
-      { id: '323', similarity: 0.89, processed_image_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' },
-      { id: '324', similarity: 0.76, processed_image_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' },
-    ],
-    thumbnailBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
-  }
-];
+// Define interface for the localStorage history manager
+interface HistoryManager {
+  saveSearch: (historyItem: HistoricalSearch) => void;
+  getAllSearches: () => HistoricalSearch[];
+  deleteSearch: (id: string) => void;
+  clearAllHistory: () => void;
+}
+
+// Create history manager for localStorage operations
+const createHistoryManager = (): HistoryManager => {
+  const STORAGE_KEY = 'image_search_history';
+
+  // Helper to get history from localStorage
+  const getHistoryFromStorage = (): HistoricalSearch[] => {
+    try {
+      const storedData = localStorage.getItem(STORAGE_KEY);
+      return storedData ? JSON.parse(storedData) : [];
+    } catch (error) {
+      console.error('Error reading history from localStorage:', error);
+      return [];
+    }
+  };
+
+  // Helper to save history to localStorage
+  const saveHistoryToStorage = (history: HistoricalSearch[]): void => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    } catch (error) {
+      console.error('Error saving history to localStorage:', error);
+    }
+  };
+
+  return {
+    saveSearch: (historyItem: HistoricalSearch): void => {
+      const history = getHistoryFromStorage();
+
+      // Check if the item with the same ID already exists
+      const existingIndex = history.findIndex(item => item.id === historyItem.id);
+
+      if (existingIndex !== -1) {
+        // Update existing item
+        history[existingIndex] = historyItem;
+      } else {
+        // Add new item
+        history.push(historyItem);
+      }
+
+      // Save updated history
+      saveHistoryToStorage(history);
+    },
+
+    getAllSearches: (): HistoricalSearch[] => {
+      return getHistoryFromStorage();
+    },
+
+    deleteSearch: (id: string): void => {
+      const history = getHistoryFromStorage();
+      const updatedHistory = history.filter(item => item.id !== id);
+      saveHistoryToStorage(updatedHistory);
+    },
+
+    clearAllHistory: (): void => {
+      saveHistoryToStorage([]);
+    }
+  };
+};
 
 const HistoryWindow: React.FC = () => {
   const [historyData, setHistoryData] = useState<HistoricalSearch[]>([]);
@@ -60,37 +90,35 @@ const HistoryWindow: React.FC = () => {
   const [showHighSimilarityOnly, setShowHighSimilarityOnly] = useState<boolean>(false);
   const [selectedHistory, setSelectedHistory] = useState<HistoricalSearch | null>(null);
 
+  // Create history manager instance
+  const historyManager = React.useMemo(() => createHistoryManager(), []);
+
   // Define high similarity threshold
   const HIGH_SIMILARITY_THRESHOLD = 0.8;
 
   useEffect(() => {
-    // In a real app, fetch data from API
-    // For now, use mock data with a small delay to simulate loading
-    const fetchData = async () => {
+    // Load history data from localStorage
+    const loadHistoryData = () => {
       setIsLoading(true);
       try {
-        // TODO: Replace with actual API call
-        // const response = await fetch('/api/history');
-        // const data = await response.json();
-
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // Get all searches from localStorage
+        const searches = historyManager.getAllSearches();
 
         // Sort by timestamp descending (newest first)
-        const sortedData = [...mockHistoryData].sort(
+        const sortedData = [...searches].sort(
           (a, b) => b.timestamp - a.timestamp
         );
 
         setHistoryData(sortedData);
       } catch (error) {
-        console.error('Error fetching history:', error);
+        console.error('Error loading history:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchData();
-  }, []);
+    loadHistoryData();
+  }, [historyManager]);
 
   // Filter data based on similarity threshold
   const filteredData = showHighSimilarityOnly
@@ -114,6 +142,32 @@ const HistoryWindow: React.FC = () => {
     setSelectedHistory(selectedHistory?.id === item.id ? null : item);
   };
 
+  // Handle history item deletion
+  const handleDeleteHistory = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Prevent item expansion when clicking delete
+
+    if (window.confirm('Are you sure you want to delete this history item?')) {
+      historyManager.deleteSearch(id);
+
+      // Update the state to reflect the change
+      setHistoryData(prev => prev.filter(item => item.id !== id));
+
+      // If the deleted item was selected, clear selection
+      if (selectedHistory?.id === id) {
+        setSelectedHistory(null);
+      }
+    }
+  };
+
+  // Handle clearing all history
+  const handleClearAllHistory = () => {
+    if (window.confirm('Are you sure you want to clear all search history?')) {
+      historyManager.clearAllHistory();
+      setHistoryData([]);
+      setSelectedHistory(null);
+    }
+  };
+
   return (
     <div className="history-window">
       <h2>Search History</h2>
@@ -127,6 +181,15 @@ const HistoryWindow: React.FC = () => {
             ? "Filter: High Similarity Only"
             : "Filter: All History"}
         </button>
+
+        {historyData.length > 0 && (
+          <button
+            className="clear-all-button"
+            onClick={handleClearAllHistory}
+          >
+            Clear All History
+          </button>
+        )}
       </div>
 
       {isLoading ? (
@@ -137,7 +200,7 @@ const HistoryWindow: React.FC = () => {
       ) : filteredData.length === 0 ? (
         <div className="no-history">
           <p>No search history found.</p>
-          {showHighSimilarityOnly && (
+          {showHighSimilarityOnly && historyData.length > 0 && (
             <p>Try showing all history instead of just high similarity results.</p>
           )}
         </div>
@@ -173,8 +236,17 @@ const HistoryWindow: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <div className="history-expand-icon">
-                  {selectedHistory?.id === item.id ? '▼' : '▶'}
+                <div className="history-actions">
+                  <button
+                    className="delete-button"
+                    onClick={(e) => handleDeleteHistory(e, item.id)}
+                    aria-label="Delete"
+                  >
+                    ×
+                  </button>
+                  <div className="history-expand-icon">
+                    {selectedHistory?.id === item.id ? '▼' : '▶'}
+                  </div>
                 </div>
               </div>
 

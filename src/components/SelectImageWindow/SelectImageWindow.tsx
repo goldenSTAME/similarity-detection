@@ -9,6 +9,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SimilarImagesGallery from "./SimilarityImagesComponent";
 import ProgressTracker, { LoadingState } from './ProgressTracker';
+import { HistoricalSearch } from '../HistoryWindow/HistoryWindow';
 
 // Define image data interface
 interface ImageData {
@@ -89,6 +90,51 @@ function SelectImageWindow() {
 
   // Progress message timeout reference
   const progressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Function to save search to history
+  const saveSearchToHistory = (searchResults: ImageData[], imagePreview: string, imageName: string) => {
+    if (!searchResults || searchResults.length === 0 || !imagePreview) return;
+
+    // Find highest similarity from results
+    const highestSimilarity = Math.max(...searchResults.map(result => result.similarity));
+
+    // Generate unique ID for this search
+    const searchId = `search_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    // Create thumbnail from imagePreview by removing the data URL prefix
+    let thumbnailBase64 = imagePreview;
+    if (imagePreview.startsWith('data:')) {
+      thumbnailBase64 = imagePreview.split(',')[1];
+    }
+
+    // Create history item
+    const historyItem: HistoricalSearch = {
+      id: searchId,
+      timestamp: Date.now(),
+      imageName: imageName || `Image_${new Date().toISOString().split('T')[0]}`,
+      highestSimilarity: highestSimilarity,
+      searchResults: searchResults,
+      thumbnailBase64: thumbnailBase64
+    };
+
+    // Save to localStorage using the history manager
+    const STORAGE_KEY = 'image_search_history';
+    try {
+      // Get existing history
+      const existingHistory = localStorage.getItem(STORAGE_KEY);
+      const historyData = existingHistory ? JSON.parse(existingHistory) : [];
+
+      // Add new item
+      historyData.push(historyItem);
+
+      // Save back to localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(historyData));
+
+      console.log('Search saved to history successfully');
+    } catch (error) {
+      console.error('Error saving search to history:', error);
+    }
+  };
 
   // Update progress message with a slight delay
   const updateProgressWithDelay = (message: string) => {
@@ -202,6 +248,12 @@ function SelectImageWindow() {
       setSearched(true);
       setLoadingState(LoadingState.IDLE);
       toast.success("Search completed successfully!");
+
+      // Save to history
+      if (results && imagePreview) {
+        const fileName = image ? image.name : "Unknown Image";
+        saveSearchToHistory(results, imagePreview, fileName);
+      }
     } catch (error: any) {
       // Handle various error cases
       setLoadingState(error.message === 'Request cancelled' ? LoadingState.CANCELLED : LoadingState.ERROR);
@@ -262,10 +314,8 @@ function SelectImageWindow() {
           uploadedImage={imagePreview}
         />
 
-        {/* Animation and Results Container - Using absolute positioning for animations */}
+        {/* Animation and Results Container */}
         <div ref={animationContainerRef} className={`animation-container ${isLoading ? 'fixed-height' : ''}`}>
-          {/* Animation blocks are absolutely positioned for clean exit/enter transitions */}
-
           {/* Lottie Animation */}
           <AnimatePresence mode="wait">
             {isLoading && (
@@ -282,14 +332,12 @@ function SelectImageWindow() {
                   loop={true}
                   className="please-wait-lottie"
                 />
-
-                {/* Keep the loading text here */}
                 <p className="loading-text">{progressMessage}</p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Progress Tracker - For stage visual indicators */}
+          {/* Progress Tracker */}
           <AnimatePresence mode="wait">
             {isLoading && (
               <motion.div

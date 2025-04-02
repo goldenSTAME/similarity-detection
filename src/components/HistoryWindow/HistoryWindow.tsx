@@ -2,87 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SimilarImagesGallery from "../SelectImageWindow/SimilarityImagesComponent";
 import './HistoryWindow.css';
-
-// Define the interface for history item data
-export interface HistoricalSearch {
-  id: string;
-  timestamp: number;
-  imageName: string;
-  highestSimilarity: number;
-  searchResults: {
-    id: string;
-    similarity: number;
-    processed_image_base64: string;
-  }[];
-  thumbnailBase64: string; // Base64 of the uploaded image thumbnail
-}
-
-// Define interface for the localStorage history manager
-interface HistoryManager {
-  saveSearch: (historyItem: HistoricalSearch) => void;
-  getAllSearches: () => HistoricalSearch[];
-  deleteSearch: (id: string) => void;
-  clearAllHistory: () => void;
-}
-
-// Create history manager for localStorage operations
-const createHistoryManager = (): HistoryManager => {
-  const STORAGE_KEY = 'image_search_history';
-
-  // Helper to get history from localStorage
-  const getHistoryFromStorage = (): HistoricalSearch[] => {
-    try {
-      const storedData = localStorage.getItem(STORAGE_KEY);
-      return storedData ? JSON.parse(storedData) : [];
-    } catch (error) {
-      console.error('Error reading history from localStorage:', error);
-      return [];
-    }
-  };
-
-  // Helper to save history to localStorage
-  const saveHistoryToStorage = (history: HistoricalSearch[]): void => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-    } catch (error) {
-      console.error('Error saving history to localStorage:', error);
-    }
-  };
-
-  return {
-    saveSearch: (historyItem: HistoricalSearch): void => {
-      const history = getHistoryFromStorage();
-
-      // Check if the item with the same ID already exists
-      const existingIndex = history.findIndex(item => item.id === historyItem.id);
-
-      if (existingIndex !== -1) {
-        // Update existing item
-        history[existingIndex] = historyItem;
-      } else {
-        // Add new item
-        history.push(historyItem);
-      }
-
-      // Save updated history
-      saveHistoryToStorage(history);
-    },
-
-    getAllSearches: (): HistoricalSearch[] => {
-      return getHistoryFromStorage();
-    },
-
-    deleteSearch: (id: string): void => {
-      const history = getHistoryFromStorage();
-      const updatedHistory = history.filter(item => item.id !== id);
-      saveHistoryToStorage(updatedHistory);
-    },
-
-    clearAllHistory: (): void => {
-      saveHistoryToStorage([]);
-    }
-  };
-};
+// 导入HistoryUtil
+import { HistoryUtil, HistoricalSearch } from '../../Utils/HistoryUtil';
 
 const HistoryWindow: React.FC = () => {
   const [historyData, setHistoryData] = useState<HistoricalSearch[]>([]);
@@ -90,42 +11,40 @@ const HistoryWindow: React.FC = () => {
   const [showHighSimilarityOnly, setShowHighSimilarityOnly] = useState<boolean>(false);
   const [selectedHistory, setSelectedHistory] = useState<HistoricalSearch | null>(null);
 
-  // Create history manager instance
-  const historyManager = React.useMemo(() => createHistoryManager(), []);
-
-  // Define high similarity threshold
+  // 定义高相似度阈值
   const HIGH_SIMILARITY_THRESHOLD = 0.8;
 
   useEffect(() => {
-    // Load history data from localStorage
+    // 加载历史数据
     const loadHistoryData = () => {
       setIsLoading(true);
       try {
-        // Get all searches from localStorage
-        const searches = historyManager.getAllSearches();
+        // 使用HistoryUtil获取所有搜索历史
+        const searches = HistoryUtil.getAllSearches();
+        console.log('HistoryWindow: Loaded history count:', searches.length);
 
-        // Sort by timestamp descending (newest first)
+        // 按时间戳排序（最新的在前）
         const sortedData = [...searches].sort(
           (a, b) => b.timestamp - a.timestamp
         );
 
         setHistoryData(sortedData);
       } catch (error) {
-        console.error('Error loading history:', error);
+        console.error('HistoryWindow: Error loading history:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
     loadHistoryData();
-  }, [historyManager]);
+  }, []);
 
-  // Filter data based on similarity threshold
+  // 根据高相似度过滤数据
   const filteredData = showHighSimilarityOnly
     ? historyData.filter(item => item.highestSimilarity >= HIGH_SIMILARITY_THRESHOLD)
     : historyData;
 
-  // Format date from timestamp
+  // 格式化日期
   const formatDate = (timestamp: number): string => {
     const date = new Date(timestamp);
     return date.toLocaleString(undefined, {
@@ -137,32 +56,34 @@ const HistoryWindow: React.FC = () => {
     });
   };
 
-  // Handle history item click
+  // 处理历史项目点击
   const handleHistoryItemClick = (item: HistoricalSearch) => {
     setSelectedHistory(selectedHistory?.id === item.id ? null : item);
   };
 
-  // Handle history item deletion
+  // 处理删除历史记录
   const handleDeleteHistory = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation(); // Prevent item expansion when clicking delete
+    e.stopPropagation(); // 防止项目展开
 
     if (window.confirm('Are you sure you want to delete this history item?')) {
-      historyManager.deleteSearch(id);
+      // 使用HistoryUtil删除
+      HistoryUtil.deleteSearch(id);
 
-      // Update the state to reflect the change
+      // 更新状态
       setHistoryData(prev => prev.filter(item => item.id !== id));
 
-      // If the deleted item was selected, clear selection
+      // 如果删除的是当前选中的项目，清除选择
       if (selectedHistory?.id === id) {
         setSelectedHistory(null);
       }
     }
   };
 
-  // Handle clearing all history
+  // 处理清空所有历史
   const handleClearAllHistory = () => {
     if (window.confirm('Are you sure you want to clear all search history?')) {
-      historyManager.clearAllHistory();
+      // 使用HistoryUtil清空
+      HistoryUtil.clearAllHistory();
       setHistoryData([]);
       setSelectedHistory(null);
     }

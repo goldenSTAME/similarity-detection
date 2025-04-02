@@ -9,7 +9,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SimilarImagesGallery from "./SimilarityImagesComponent";
 import ProgressTracker, { LoadingState } from './ProgressTracker';
-import { HistoricalSearch } from '../HistoryWindow/HistoryWindow';
+// 导入新的历史工具
+import { HistoryUtil, HistoricalSearch } from '../../Utils/HistoryUtil';
 
 // Define image data interface
 interface ImageData {
@@ -93,7 +94,10 @@ function SelectImageWindow() {
 
   // Function to save search to history
   const saveSearchToHistory = (searchResults: ImageData[], imagePreview: string, imageName: string) => {
-    if (!searchResults || searchResults.length === 0 || !imagePreview) return;
+    if (!searchResults || searchResults.length === 0 || !imagePreview) {
+      console.log('Cannot save history: Missing data');
+      return;
+    }
 
     // Find highest similarity from results
     const highestSimilarity = Math.max(...searchResults.map(result => result.similarity));
@@ -117,24 +121,10 @@ function SelectImageWindow() {
       thumbnailBase64: thumbnailBase64
     };
 
-    // Save to localStorage using the history manager
-    const STORAGE_KEY = 'image_search_history';
-    try {
-      // Get existing history
-      const existingHistory = localStorage.getItem(STORAGE_KEY);
-      const historyData = existingHistory ? JSON.parse(existingHistory) : [];
-
-      // Add new item
-      historyData.push(historyItem);
-
-      // Save back to localStorage
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(historyData));
-
-      console.log('Search saved to history successfully');
-    } catch (error) {
-      console.error('Error saving search to history:', error);
-    }
-  };
+    // Use the shared history manager to save the item
+  const savedCount = HistoryUtil.saveSearch(historyItem);
+  console.log(`Search saved to history successfully (total: ${savedCount})`);
+};
 
   // Update progress message with a slight delay
   const updateProgressWithDelay = (message: string) => {

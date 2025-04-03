@@ -15,6 +15,9 @@ import fallbackImage from "../../assets/images/logo_fallback.png";
 // 保留原有 CSS 引入
 import "./Sidebar.css";
 
+// 引入 react-router-dom 的 useNavigate 钩子
+import { useNavigate } from "react-router-dom";
+
 const menuItems = [
   { name: "Select Image", animation: selectImageAnimation, framePause: 22 },
   { name: "History", animation: historyAnimation, framePause: 23 },
@@ -58,6 +61,9 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
       "Logs": logsAnimation.op - 1,
     },
   });
+
+  // 创建 navigate 实例
+  const navigate = useNavigate();
 
   // 检测 APNG 支持情况
   useEffect(() => {
@@ -119,6 +125,15 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
 
   const handleItemClick = (itemName) => {
     setActiveWindow(itemName);
+    if (itemName === "Select Image") {
+      navigate("/select-image"); // 跳转到 SelectImageWindow
+    } else if (itemName === "History") {
+      navigate("/history"); // 跳转到 History 页面
+    } else if (itemName === "Details") {
+      navigate("/details"); // 跳转到 Details 页面
+    } else if (itemName === "Logs") {
+      navigate("/logs"); // 跳转到 Logs 页面
+    }
   };
 
   // 点击菜单项时触发的函数，确保倍速播放且动画不被打断

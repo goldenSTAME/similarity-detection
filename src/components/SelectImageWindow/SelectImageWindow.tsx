@@ -1,18 +1,27 @@
+// React 核心
 import React, { useState, useRef, useEffect } from 'react';
+
+// 动画库
 import { motion, AnimatePresence } from 'framer-motion';
 import Lottie from 'lottie-react';
 import pleaseWaitAnimation from '../../animations/pleasewait.json';
+
+// 工具类
 import { ImageUtils } from '../../Utils/ImageUtils';
-import './SelectImageWindow.css';
+import { HistoryUtil, HistoricalSearch } from '../../Utils/HistoryUtil';
+
+// 组件
 import UploadZone from "../UploadZone/UploadZone";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import SimilarImagesGallery from "./SimilarityImagesComponent";
 import ProgressTracker, { LoadingState } from './ProgressTracker';
-// 导入新的历史工具
-import { HistoryUtil, HistoricalSearch } from '../../Utils/HistoryUtil';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
+// Toast 相关
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// 样式文件 (确保custom样式在最后)
+import './SelectImageWindow.css';
+import './toast-custom.css';
 
 // Define image data interface
 interface ImageData {
@@ -30,51 +39,50 @@ interface ActionSectionProps {
 }
 
 const ActionSection: React.FC<ActionSectionProps> = ({
-  isLoading,
-  loadingState,
-  handleCancel,
-  handleSearch
-}) => {
+                                                       isLoading,
+                                                       loadingState,
+                                                       handleCancel,
+                                                       handleSearch
+                                                     }) => {
   return (
-    <motion.div
-      className="action-section"
-      layout
-      transition={{ duration: 0.3 }}
-    >
-      <motion.hr
-        className="divider"
-        layout
-        transition={{ duration: 0.3 }}
-      />
-      <div className="action-buttons">
-        <motion.span
-          key="cancel"
-          className={`cancel-text ${isLoading ? 'active' : 'disabled'}`}
-          onClick={isLoading ? handleCancel : undefined}
+      <motion.div
+          className="action-section"
           layout
           transition={{ duration: 0.3 }}
-          whileHover={{ scale: isLoading ? 1.05 : 1 }}
-        >
-          Cancel
-        </motion.span>
-        <motion.button
-          key="search"
-          onClick={handleSearch}
-          disabled={isLoading}
-          className={isLoading ? 'loading' : ''}
-          layout
-          transition={{ duration: 0.3 }}
-          whileHover={{ scale: !isLoading ? 1.05 : 1 }}
-        >
-          {isLoading ? 'Processing...' : 'Search'}
-        </motion.button>
-      </div>
-    </motion.div>
+      >
+        <motion.hr
+            className="divider"
+            layout
+            transition={{ duration: 0.3 }}
+        />
+        <div className="action-buttons">
+          <motion.span
+              key="cancel"
+              className={`cancel-text ${isLoading ? 'active' : 'disabled'}`}
+              onClick={isLoading ? handleCancel : undefined}
+              layout
+              transition={{ duration: 0.3 }}
+              whileHover={{ scale: isLoading ? 1.05 : 1 }}
+          >
+            Cancel
+          </motion.span>
+          <motion.button
+              key="search"
+              onClick={handleSearch}
+              disabled={isLoading}
+              className={isLoading ? 'loading' : ''}
+              layout
+              transition={{ duration: 0.3 }}
+              whileHover={{ scale: !isLoading ? 1.05 : 1 }}
+          >
+            {isLoading ? 'Processing...' : 'Search'}
+          </motion.button>
+        </div>
+      </motion.div>
   );
 };
 
 function SelectImageWindow() {
-  const navigate = useNavigate(); // Initialize useNavigate hook
   const [image, setImage] = useState<File | null>(null);
   const [similarImages, setSimilarImages] = useState<ImageData[]>([]);
   const [numResults, setNumResults] = useState<number>(5);
@@ -125,9 +133,9 @@ function SelectImageWindow() {
     };
 
     // Use the shared history manager to save the item
-  const savedCount = HistoryUtil.saveSearch(historyItem);
-  console.log(`Search saved to history successfully (total: ${savedCount})`);
-};
+    const savedCount = HistoryUtil.saveSearch(historyItem);
+    console.log(`Search saved to history successfully (total: ${savedCount})`);
+  };
 
   // Update progress message with a slight delay
   const updateProgressWithDelay = (message: string) => {
@@ -295,107 +303,122 @@ function SelectImageWindow() {
   };
 
   return (
-    <div className="select-image-window">
-      <div ref={contentRef} className="content">
-        <h2>Select Image</h2>
-        <UploadZone
-          dragOver={dragOver}
-          handleDragOver={handleDragOver}
-          handleDragLeave={handleDragLeave}
-          handleDrop={handleDrop}
-          handleFileChange={handleFileChange}
-          uploadedImage={imagePreview}
+      <div className="select-image-window">
+        <div ref={contentRef} className="content">
+          <h2>Select Image</h2>
+          <UploadZone
+              dragOver={dragOver}
+              handleDragOver={handleDragOver}
+              handleDragLeave={handleDragLeave}
+              handleDrop={handleDrop}
+              handleFileChange={handleFileChange}
+              uploadedImage={imagePreview}
+          />
+
+          {/* Animation and Results Container */}
+          <div ref={animationContainerRef} className={`animation-container ${isLoading ? 'fixed-height' : ''}`}>
+            {/* Lottie Animation */}
+            <AnimatePresence mode="wait">
+              {isLoading && (
+                  <motion.div
+                      key="lottie"
+                      className="lottie-wrapper"
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.3 }}
+                  >
+                    <Lottie
+                        animationData={pleaseWaitAnimation}
+                        loop={true}
+                        className="please-wait-lottie"
+                    />
+                    <p className="loading-text">{progressMessage}</p>
+                  </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Progress Tracker */}
+            <AnimatePresence mode="wait">
+              {isLoading && (
+                  <motion.div
+                      key="progress"
+                      className="progress-wrapper"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                  >
+                    <ProgressTracker
+                        currentState={loadingState}
+                        progressMessage={progressMessage}
+                        isLoading={isLoading}
+                    />
+                  </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Search Results */}
+            <AnimatePresence mode="wait">
+              {!isLoading && similarImages.length > 0 && (
+                  <motion.div
+                      key="results"
+                      className="results-wrapper"
+                      initial={{ opacity: 0, x: "100%" }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: "100%" }}
+                      transition={{ duration: 0.3 }}
+                  >
+                    <SimilarImagesGallery images={similarImages} />
+                  </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* No Results Message */}
+            <AnimatePresence mode="wait">
+              {!isLoading && searched && similarImages.length === 0 && (
+                  <motion.div
+                      key="noResults"
+                      className="no-results-wrapper"
+                      initial={{ opacity: 0, x: "100%" }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: "100%" }}
+                      transition={{ duration: 0.3 }}
+                  >
+                    <p className="no-results-message">
+                      No similar images found.
+                    </p>
+                  </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Bottom Action Section */}
+        <ActionSection
+            isLoading={isLoading}
+            loadingState={loadingState}
+            handleCancel={handleCancel}
+            handleSearch={handleSearch}
         />
 
-        {/* Animation and Results Container */}
-        <div ref={animationContainerRef} className={`animation-container ${isLoading ? 'fixed-height' : ''}`}>
-          {/* Lottie Animation */}
-          <AnimatePresence mode="wait">
-            {isLoading && (
-              <motion.div
-                key="lottie"
-                className="lottie-wrapper"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Lottie
-                  animationData={pleaseWaitAnimation}
-                  loop={true}
-                  className="please-wait-lottie"
-                />
-                <p className="loading-text">{progressMessage}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Progress Tracker */}
-          <AnimatePresence mode="wait">
-            {isLoading && (
-              <motion.div
-                key="progress"
-                className="progress-wrapper"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ProgressTracker
-                  currentState={loadingState}
-                  progressMessage={progressMessage}
-                  isLoading={isLoading}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Search Results */}
-          <AnimatePresence mode="wait">
-            {!isLoading && similarImages.length > 0 && (
-              <motion.div
-                key="results"
-                className="results-wrapper"
-                initial={{ opacity: 0, x: "100%" }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: "100%" }}
-                transition={{ duration: 0.3 }}
-              >
-                <SimilarImagesGallery images={similarImages} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* No Results Message */}
-          <AnimatePresence mode="wait">
-            {!isLoading && searched && similarImages.length === 0 && (
-              <motion.div
-                key="noResults"
-                className="no-results-wrapper"
-                initial={{ opacity: 0, x: "100%" }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: "100%" }}
-                transition={{ duration: 0.3 }}
-              >
-                <p className="no-results-message">
-                  No similar images found.
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        {/* Toast container with custom classes applied */}
+        <ToastContainer
+            className="custom-toast-container"
+            toastClassName="custom-toast"
+            progressClassName="custom-progress-bar"
+            position="top-right"
+            autoClose={1500}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+        />
       </div>
-
-      {/* Bottom Action Section */}
-      <ActionSection
-        isLoading={isLoading}
-        loadingState={loadingState}
-        handleCancel={handleCancel}
-        handleSearch={handleSearch}
-      />
-
-      <ToastContainer />
-    </div>
   );
 }
 

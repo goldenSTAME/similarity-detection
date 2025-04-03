@@ -1,0 +1,239 @@
+/** Used to define container behavior: width, position: fixed etc... **/
+body .Toastify__toast-container {
+    width: 320px;
+    padding: 16px;
+    box-sizing: border-box;
+    z-index: 9999;
+}
+
+/** Used to define the position of the ToastContainer **/
+body .Toastify__toast-container--top-left {
+    top: 1rem;
+    left: 1rem;
+}
+body .Toastify__toast-container--top-center {
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+body .Toastify__toast-container--top-right {
+    top: 1rem;
+    right: 1rem;
+}
+body .Toastify__toast-container--bottom-left {
+    bottom: 1rem;
+    left: 1rem;
+}
+body .Toastify__toast-container--bottom-center {
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+body .Toastify__toast-container--bottom-right {
+    bottom: 1rem;
+    right: 1rem;
+}
+
+/** Classes for the displayed toast **/
+body .Toastify__toast {
+    position: relative;
+    min-height: 64px;
+    margin-bottom: 1rem;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between; /* This puts content on left and button on right */
+    align-items: center;
+    cursor: pointer;
+    opacity: 0.95;
+    transition: all 0.3s ease;
+}
+body .Toastify__toast:hover {
+    opacity: 1;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+body .Toastify__toast--rtl {
+    direction: rtl;
+}
+
+/** Used to position the icon **/
+body .Toastify__toast-icon {
+    margin-right: 12px; /* Space between icon and text */
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+/** Body of the toast, where text is displayed **/
+body .Toastify__toast-body {
+    flex: 1; /* Takes up available space */
+    padding-right: 16px; /* More space for close button */
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+}
+
+/** handle the notification color and the text color based on the theme **/
+body .Toastify__toast-theme--dark {
+    background: #333;
+    color: #fff;
+}
+body .Toastify__toast-theme--light {
+    background: #fff;
+    color: #333;
+}
+body .Toastify__toast-theme--colored.Toastify__toast--default {
+    background: #5e6e82;
+    color: #fff;
+}
+body .Toastify__toast-theme--colored.Toastify__toast--info {
+    background: #3498db;
+    color: #fff;
+}
+body .Toastify__toast-theme--colored.Toastify__toast--success {
+    background: #2ecc71;
+    color: #fff;
+}
+body .Toastify__toast-theme--colored.Toastify__toast--warning {
+    background: #f39c12;
+    color: #fff;
+}
+body .Toastify__toast-theme--colored.Toastify__toast--error {
+    background: #e74c3c;
+    color: #fff;
+}
+
+body .Toastify__progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    border-radius: 0 0 8px 8px;
+    opacity: 0.7;
+    transform-origin: left;
+}
+body .Toastify__progress-bar--rtl {
+    right: 0;
+    left: initial;
+    transform-origin: right;
+}
+body .Toastify__progress-bar-theme--light {
+    background: rgba(0, 0, 0, 0.2);
+}
+body .Toastify__progress-bar-theme--dark {
+    background: rgba(255, 255, 255, 0.2);
+}
+body .Toastify__progress-bar--info {
+    background: #3498db;
+}
+body .Toastify__progress-bar--success {
+    background: #2ecc71;
+}
+body .Toastify__progress-bar--warning {
+    background: #f39c12;
+}
+body .Toastify__progress-bar--error {
+    background: #e74c3c;
+}
+/** colored notifications share the same progress bar color **/
+body .Toastify__progress-bar-theme--colored.Toastify__progress-bar--info,
+body .Toastify__progress-bar-theme--colored.Toastify__progress-bar--success,
+body .Toastify__progress-bar-theme--colored.Toastify__progress-bar--warning,
+body .Toastify__progress-bar-theme--colored.Toastify__progress-bar--error {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+/** Completely redesigned close button **/
+body .Toastify__close-button {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+    margin-left: 8px;
+    position: relative;
+    right: 0;
+    opacity: 0.8;
+}
+
+body .Toastify__close-button--default {
+    opacity: 0.7;
+}
+
+body .Toastify__close-button > svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+body .Toastify__close-button:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+body .Toastify__close-button:focus {
+    opacity: 1;
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Make sure text doesn't overflow */
+body .Toastify__toast-body > div:last-child {
+    word-break: break-word;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Dark mode adjustments */
+.dark body .Toastify__toast {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dark body .Toastify__close-button {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.dark body .Toastify__close-button:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments for mobile */
+@media only screen and (max-width: 480px) {
+    body .Toastify__toast-container {
+        width: 100vw;
+        padding: 0;
+        left: 0;
+        margin: 0;
+    }
+
+    body .Toastify__toast-container--top-left,
+    body .Toastify__toast-container--top-center,
+    body .Toastify__toast-container--top-right {
+        top: 0;
+        transform: translateX(0);
+    }
+
+    body .Toastify__toast-container--bottom-left,
+    body .Toastify__toast-container--bottom-center,
+    body .Toastify__toast-container--bottom-right {
+        bottom: 0;
+        transform: translateX(0);
+    }
+
+    body .Toastify__toast {
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+}

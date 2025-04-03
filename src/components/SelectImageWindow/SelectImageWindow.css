@@ -107,8 +107,9 @@
   opacity: 0.5;
 }
 
-/* Button styles - SCOPED to select-image-window to avoid affecting other components */
-.select-image-window button {
+/* Button styles - SCOPED more specifically to avoid affecting Toast buttons */
+.select-image-window .action-section button,
+.select-image-window .upload-zone button {
   padding: 8px 16px;
   font-size: 16px;
   cursor: pointer;
@@ -127,18 +128,21 @@
   position: relative; /* For proper spinner positioning */
 }
 
-.select-image-window button:disabled {
+.select-image-window .action-section button:disabled,
+.select-image-window .upload-zone button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.select-image-window button.loading {
+.select-image-window .action-section button.loading,
+.select-image-window .upload-zone button.loading {
   background-color: #6c757d;
   position: relative;
 }
 
 /* Modified spinner to take up less horizontal space */
-.select-image-window button.loading::after {
+.select-image-window .action-section button.loading::after,
+.select-image-window .upload-zone button.loading::after {
   content: '';
   display: inline-block;
   width: 14px; /* Slightly smaller spinner */
@@ -188,21 +192,25 @@
   border-top-color: #3a3a3a; /* Subtle divider */
 }
 
-.dark .select-image-window button {
+.dark .select-image-window .action-section button,
+.dark .select-image-window .upload-zone button {
   background-color: #0d6efd; /* More visible blue button */
   color: #ffffff;
 }
 
-.dark .select-image-window button:hover {
+.dark .select-image-window .action-section button:hover,
+.dark .select-image-window .upload-zone button:hover {
   background-color: #0b5ed7; /* Slightly darker on hover */
 }
 
-.dark .select-image-window button:disabled {
+.dark .select-image-window .action-section button:disabled,
+.dark .select-image-window .upload-zone button:disabled {
   background-color: #0d6efd;
   opacity: 0.5;
 }
 
-.dark .select-image-window button.loading {
+.dark .select-image-window .action-section button.loading,
+.dark .select-image-window .upload-zone button.loading {
   background-color: #495057; /* Muted gray for loading state */
 }
 

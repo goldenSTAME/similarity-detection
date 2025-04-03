@@ -20,7 +20,7 @@ const HistoryWindow: React.FC = () => {
       setIsLoading(true);
       try {
         // 使用HistoryUtil获取所有搜索历史
-        const searches = HistoryUtil.getAllSearches();
+        const searches: HistoricalSearch[] = HistoryUtil.getAllSearches();
         console.log('HistoryWindow: Loaded history count:', searches.length);
 
         // 按时间戳排序（最新的在前）

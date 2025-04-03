@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SimilarImagesGallery from "../SelectImageWindow/SimilarityImagesComponent";
 import './HistoryWindow.css';
+import { useNavigate } from "react-router-dom";
 // 导入HistoryUtil
 import { HistoryUtil, HistoricalSearch } from '../../Utils/HistoryUtil';
 
@@ -10,6 +11,7 @@ const HistoryWindow: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showHighSimilarityOnly, setShowHighSimilarityOnly] = useState<boolean>(false);
   const [selectedHistory, setSelectedHistory] = useState<HistoricalSearch | null>(null);
+  const navigate = useNavigate();
 
   // 定义高相似度阈值
   const HIGH_SIMILARITY_THRESHOLD = 0.8;
@@ -89,6 +91,10 @@ const HistoryWindow: React.FC = () => {
     }
   };
 
+  const handleImageClick = (imageId: string) => {
+    navigate(`/detail/${imageId}`);
+  };
+
   return (
     <div className="history-window">
       <h2>Search History</h2>
@@ -137,7 +143,7 @@ const HistoryWindow: React.FC = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="history-item-header">
-                <div className="history-thumbnail">
+                <div className="history-thumbnail" onClick={() => handleImageClick(item.id)}>
                   <img
                     src={`data:image/png;base64,${item.thumbnailBase64}`}
                     alt={`Thumbnail for ${item.imageName}`}

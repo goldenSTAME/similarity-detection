@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+  import React, { useEffect, useState } from 'react';
 import './SimilarImagesGallery.css';
+  import { useNavigate } from "react-router-dom";
 
 interface ImageData {
   id: string;
@@ -13,6 +14,7 @@ interface SimilarImagesGalleryProps {
 
 const SimilarImagesGallery: React.FC<SimilarImagesGalleryProps> = ({ images }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Trigger animation after component mounts
@@ -23,13 +25,17 @@ const SimilarImagesGallery: React.FC<SimilarImagesGalleryProps> = ({ images }) =
     return () => clearTimeout(timer);
   }, []);
 
+  const handleImageClick = (imageId: string) => {
+    navigate(`/details/${imageId}`);
+  };
+
   if (images.length === 0) return null;
 
   return (
     <div className={`similar-images-gallery ${isVisible ? 'visible' : ''}`}>
       <div className="gallery-scroll-container">
         {images.map((imageData, index) => (
-          <div key={index} className="image-card">
+          <div key={index} className="image-card" onClick={() => handleImageClick(imageData.id)}>
             <div className="image-container">
               <img 
                 src={`data:image/png;base64,${imageData.processed_image_base64}`} 

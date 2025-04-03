@@ -11,6 +11,8 @@ import SimilarImagesGallery from "./SimilarityImagesComponent";
 import ProgressTracker, { LoadingState } from './ProgressTracker';
 // 导入新的历史工具
 import { HistoryUtil, HistoricalSearch } from '../../Utils/HistoryUtil';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
+
 
 // Define image data interface
 interface ImageData {
@@ -72,6 +74,7 @@ const ActionSection: React.FC<ActionSectionProps> = ({
 };
 
 function SelectImageWindow() {
+  const navigate = useNavigate(); // Initialize useNavigate hook
   const [image, setImage] = useState<File | null>(null);
   const [similarImages, setSimilarImages] = useState<ImageData[]>([]);
   const [numResults, setNumResults] = useState<number>(5);

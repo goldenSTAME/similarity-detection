@@ -66,9 +66,10 @@ function AppContent({ activeWindow, setActiveWindow, isDark, toggleTheme }) {
         />
         <main className="main-content">
           <Routes>
+            <Route path="" element={<SelectImageWindow />} />
             <Route path="/select-image" element={<SelectImageWindow />} />
             <Route path="/history" element={<HistoryWindow />} />
-            <Route path="/detail/:imageId" element={<DetailWindow />} />
+            <Route path="/details/:imageId?" element={<DetailWindow />} />
           </Routes>
         </main>
       </div>

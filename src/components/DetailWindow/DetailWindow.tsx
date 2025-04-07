@@ -2,61 +2,140 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "./DetailWindow.css";
 
-interface ImageDetail {
-    id: string;
-    original_image_base64: string;
-    processed_image_base64: string;
-    image_url: string;
+interface ImageData {
+    imageId: string;
+    imageUrl: string;
+    originalImageId: string;
+    originalImageUrl: string;
 }
 
 const DetailWindow: React.FC = () => {
     const { imageId } = useParams<{ imageId: string }>();
-    const [imageDetail, setImageDetail] = useState<ImageDetail | null>(null);
+    const [imageData, setImageData] = useState<ImageData | null>(null);
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
+    const [showFullImage, setShowFullImage] = useState(false);
 
     useEffect(() => {
-        const fetchImageDetail = async () => {
-            try {
-                const response = await fetch(`http://localhost:5001/image_details/${imageId}`);
-                const data = await response.json();
-                setImageDetail(data);
-            } catch (error) {
-                console.error("Error fetching image details:", error);
-            }
-        };
-
         if (imageId) {
-            fetchImageDetail();
+            // 模拟从后端获取数据
+            const fetchedData: ImageData = {
+                imageId: imageId,
+                imageUrl: `https://example.com/images/${imageId}.jpg`, // Replace with the actual image URL
+                originalImageId: `original-${imageId}`,
+                originalImageUrl: `https://example.com/originals/original-${imageId}.jpg`, // Replace with the original image URL
+            };
+            setImageData(fetchedData);
+        } else {
+            setImageData(null);
         }
     }, [imageId]);
 
-    if (!imageDetail) {
-        return <p className="loading">加载中...</p>;
-    }
+    const handleImageLoad = () => {
+        setImageLoaded(true);
+        setImageError(false);
+    };
+
+    const handleImageError = () => {
+        setImageError(true);
+        setImageLoaded(false);
+    };
+
+    const handleCopy = (text: string) => {
+        navigator.clipboard.writeText(text);
+        alert("已复制：" + text);
+    };
+
+    const toggleImagePreview = () => {
+        setShowFullImage((prev) => !prev);
+    };
 
     return (
         <div className="detail-window">
-            <h2>图片详情</h2>
+            <h2 className="detail-title">图片详情</h2>
+
             <div className="image-section">
-                <div className="image-container">
-                    <h3>切割前原图</h3>
-                    <img
-                        src={`data:image/png;base64,${imageDetail.original_image_base64}`}
-                        alt="Original"
-                        className="original-image"
-                    />
-                </div>
-                <div className="image-container">
-                    <h3>处理后图片</h3>
-                    <img
-                        src={`data:image/png;base64,${imageDetail.processed_image_base64}`}
-                        alt="Processed"
-                        className="processed-image"
-                    />
-                </div>
-            </div>
-            <div className="image-info">
-                <p><strong>ID:</strong> {imageDetail.id}</p>
-                <p><strong>图片 URL:</strong> <a href={imageDetail.image_url} target="_blank" rel="noopener noreferrer">{imageDetail.image_url}</a></p>
+                {imageData ? (
+                    <>
+                        <div className="image-container">
+                            <div
+                                className="image-box"
+                                onClick={toggleImagePreview}
+                            >
+                                {!imageLoaded && !imageError && (
+                                    <div className="placeholder">Image is loading...</div>
+                                )}
+                                {imageError && (
+                                    <div className="placeholder">Image Loading Failed</div>
+                                )}
+                                {!imageError && imageLoaded && (
+                                    <img
+                                        src={imageData.imageUrl}
+                                        alt="Loaded Image"
+                                        className={showFullImage ? "zoomed" : ""}
+                                        onLoad={handleImageLoad}
+                                        onError={handleImageError}
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="info-row">
+                            <span>图片 ID: {imageData.imageId}</span>
+                            <button onClick={() => handleCopy(imageData.imageId)}>复制</button>
+                        </div>
+
+                        <div className="image-container">
+                            <div
+                                className="image-box"
+                                onClick={toggleImagePreview}
+                            >
+                                {!imageLoaded && !imageError && (
+                                    <div className="placeholder">Original Image is loading...</div>
+                                )}
+                                {imageError && (
+                                    <div className="placeholder">Original Image Loading Failed</div>
+                                )}
+                                {!imageError && imageLoaded && (
+                                    <img
+                                        src={imageData.originalImageUrl}
+                                        alt="Loaded Image"
+                                        className={showFullImage ? "zoomed" : ""}
+                                        onLoad={handleImageLoad}
+                                        onError={handleImageError}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                        {/*<div className="image-container">*/}
+                        {/*    <div className="image-box">*/}
+                        {/*        <img*/}
+                        {/*            src={imageData.originalImageUrl}*/}
+                        {/*            alt="Original Image"*/}
+                        {/*            className={showFullImage ? "zoomed" : ""}*/}
+                        {/*        />*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
+
+                        <div className="info-row">
+                            <span>原图 ID: {imageData.originalImageId}</span>
+                            <button onClick={() => handleCopy(imageData.originalImageId)}>
+                                复制
+                            </button>
+                        </div>
+
+                        <div className="info-row">
+                            <span>原图 URL: {imageData.originalImageUrl}</span>
+                            <button onClick={() => handleCopy(imageData.originalImageUrl)}>
+                                复制
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="placeholder">
+                        <p>请从历史记录或相似图片中选择一张图片查看详情。</p>
+                    </div>
+                )}
             </div>
         </div>
     );

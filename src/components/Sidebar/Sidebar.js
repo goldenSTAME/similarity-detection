@@ -6,6 +6,8 @@ import detailsAnimation from "../../animations/details.json";
 import logsAnimation from "../../animations/logs.json";
 // 导入主题切换按钮组件
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
+// 添加 UserProfile 组件导入
+import UserProfile from "../Auth/UserProfile";
 
 // 导入 logo 的 APNG 文件（支持 alpha 的动画，需浏览器支持 APNG）
 import logoApng from "../../assets/images/logo.apng";
@@ -27,7 +29,8 @@ const menuItems = [
   { name: "Support", animation: null },
 ];
 
-function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
+// 更新函数参数，添加 user 和 onLogout
+function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow, user, onLogout }) {
   const [isLottiePlaying, setIsLottiePlaying] = useState({
     "Select Image": false,
     "History": false,
@@ -238,6 +241,7 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
       setShowApng(false);
     }, 8000);
   };
+
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
       {/* 头部 Logo，使用 APNG 动画或 fallback 图片 */}
@@ -263,6 +267,12 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
             <img className="logo-video" src={fallbackImage} alt="Fallback Logo" />
           )}
         </div>
+        {/* 添加用户资料区域 */}
+        {user && (
+          <div className="user-profile-container">
+            <UserProfile user={user} onLogout={onLogout} />
+          </div>
+        )}
       </div>
 
       {/* 菜单区域 */}

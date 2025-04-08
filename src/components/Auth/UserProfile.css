@@ -1,0 +1,154 @@
+/* src/components/Auth/UserProfile.css */
+.user-profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1e90ff;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+}
+
+.user-avatar:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.role-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.role-indicator.admin {
+  background-color: #e74c3c;
+}
+
+.role-indicator.user {
+  background-color: #2ecc71;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 250px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.user-info {
+  padding-bottom: 12px;
+}
+
+.user-email {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+  word-break: break-all;
+}
+
+.user-role {
+  font-size: 13px;
+  color: #666;
+  padding: 3px 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 10px 0;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border: none;
+  border-radius: 6px;
+  color: #e74c3c;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #f0f0f0;
+}
+
+.logout-button svg {
+  color: #e74c3c;
+}
+
+/* 深色模式样式 */
+.dark .user-avatar {
+  background-color: #0d6efd;
+}
+
+.dark .profile-dropdown {
+  background-color: #222;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+}
+
+.dark .user-email {
+  color: #eee;
+}
+
+.dark .user-role {
+  color: #ddd;
+  background-color: #333;
+}
+
+.dark .dropdown-divider {
+  background-color: #444;
+}
+
+.dark .logout-button {
+  background-color: #333;
+  color: #ff6b6b;
+}
+
+.dark .logout-button:hover {
+  background-color: #3a3a3a;
+}
+
+.dark .logout-button svg {
+  color: #ff6b6b;
+}

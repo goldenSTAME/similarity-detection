@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SelectImageWindow from "./components/SelectImageWindow/SelectImageWindow";
@@ -18,18 +18,32 @@ const LoadingAnimation = ({ isDark }: { isDark: boolean }) => (
   </div>
 );
 
-// Login Prompt component for unauthenticated pages
-const LoginPrompt = ({ onLoginClick }: { onLoginClick: () => void }) => (
-  <div className="login-prompt">
-    <div className="login-prompt-content">
-      <h2>Please Login First</h2>
-      <p>You need to login to access this feature.</p>
-      <button className="login-prompt-button" onClick={onLoginClick}>
-        Login
-      </button>
-    </div>
-  </div>
-);
+// Integrated login prompt for authenticated content
+const AuthRequired = ({
+  isAuthenticated,
+  onLoginClick,
+  children
+}: {
+  isAuthenticated: boolean,
+  onLoginClick: () => void,
+  children: React.ReactNode
+}) => {
+  if (!isAuthenticated) {
+    // Show only the auth prompt without rendering original content
+    return (
+      <div className="auth-required-container">
+        <div className="auth-required-message">
+          <h3>Authentication Required</h3>
+          <p>Please log in to access this feature</p>
+          <button className="login-prompt-button" onClick={onLoginClick}>
+            Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return <>{children}</>;
+};
 
 function App() {
   const [activeWindow, setActiveWindow] = useState<string>("Select Image");
@@ -46,6 +60,17 @@ function App() {
   const [user, setUser] = useState<UserData | null>(null);
   const [showLoginOverlay, setShowLoginOverlay] = useState<boolean>(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
+
+  // Create a memoized toggleTheme function to avoid re-renders
+  const toggleTheme = useCallback(() => {
+    console.log("toggleTheme called, current isDark:", isDark);
+    setIsDark(prev => {
+      const newTheme = !prev;
+      console.log("Setting theme to:", newTheme ? "dark" : "light");
+      localStorage.setItem("theme", newTheme ? "dark" : "light");
+      return newTheme;
+    });
+  }, [isDark]); // Include isDark in dependencies
 
   // Verify authentication status
   useEffect(() => {
@@ -76,14 +101,6 @@ function App() {
     verifyAuth();
   }, []);
 
-  const toggleTheme = () => {
-    setIsDark((prev) => {
-      const newTheme = !prev;
-      localStorage.setItem("theme", newTheme ? "dark" : "light");
-      return newTheme;
-    });
-  };
-
   const handleLogin = (userData: UserData) => {
     setIsAuthenticated(true);
     setUser(userData);
@@ -107,24 +124,16 @@ function App() {
     setShowLoginOverlay(true);
   };
 
-  // Content component that either shows actual content or login prompt
-  const AuthenticatedContent = ({ children }: { children: React.ReactNode }) => {
-    if (!isAuthenticated) {
-      return <LoginPrompt onLoginClick={handleLoginClick} />;
-    }
-    return <>{children}</>;
-  };
-
   return (
     <Router>
       <div className={`app-container ${isDark ? "dark" : "light"}`}>
-        {/* Login button or user profile in the top-right corner */}
+        {/* Login button (text only) or user profile in the top-right corner */}
         <div className="top-right-auth">
           {isAuthenticated && user ? (
             <UserProfile user={user} onLogout={handleLogout} />
           ) : (
             <button
-              className="login-button-topright"
+              className="login-text-button"
               onClick={handleLoginClick}
               aria-label="Login"
             >
@@ -146,9 +155,10 @@ function App() {
           isDark={isDark}
           toggleTheme={toggleTheme}
           activeWindow={activeWindow}
-          setActiveWindow={setActiveWindow}
+          setActiveWindow={isAuthenticated ? setActiveWindow : () => handleLoginClick()}
           user={user}
           onLogout={handleLogout}
+          allowThemeToggleOnly={!isAuthenticated}
         />
 
         <main className="main-content">
@@ -157,24 +167,24 @@ function App() {
           ) : (
             <Routes>
               <Route path="/" element={
-                <AuthenticatedContent>
+                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
                   <SelectImageWindow />
-                </AuthenticatedContent>
+                </AuthRequired>
               } />
               <Route path="/select-image" element={
-                <AuthenticatedContent>
+                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
                   <SelectImageWindow />
-                </AuthenticatedContent>
+                </AuthRequired>
               } />
               <Route path="/history" element={
-                <AuthenticatedContent>
+                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
                   <HistoryWindow />
-                </AuthenticatedContent>
+                </AuthRequired>
               } />
               <Route path="/details/:imageId?" element={
-                <AuthenticatedContent>
+                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
                   <DetailWindow />
-                </AuthenticatedContent>
+                </AuthRequired>
               } />
             </Routes>
           )}

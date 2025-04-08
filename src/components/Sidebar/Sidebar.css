@@ -35,6 +35,13 @@
 .sidebar-menu {
   flex: 1;
   width: 100%;
+  position: relative; /* 为菜单区域添加定位上下文 */
+  transition: opacity 0.3s ease; /* 添加过渡效果 */
+}
+
+/* 当菜单被禁用时的样式 */
+.sidebar-menu.menu-disabled {
+  pointer-events: none; /* 禁止所有点击事件 */
 }
 
 /* 菜单列表 */
@@ -80,6 +87,38 @@
 
 .dark-mode .menu-item.active {
   background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 禁用状态的菜单项 */
+.menu-item.disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
+.menu-item.disabled:hover {
+  background-color: transparent;
+}
+
+.menu-item.disabled.active {
+  border-left-color: transparent;
+}
+
+/* 确保主题切换按钮始终可用，即使在锁定状态 */
+.sidebar-footer {
+  pointer-events: auto !important; /* 强制可点击 */
+  opacity: 1 !important; /* 强制完全不透明 */
+  z-index: 9999 !important; /* 确保在最上层 */
+  position: relative !important; /* 确保z-index生效 */
+  padding: 10px 0 !important; /* 添加一些内边距 */
+  cursor: pointer !important; /* 设置光标为指针 */
+  margin: 0 auto !important; /* 使其水平居中 */
+  width: 220px !important; /* 确保宽度 */
+  height: 44px !important; /* 确保高度 */
+  display: flex !important; /* 确保其显示为flex */
+  align-items: center !important; /* 垂直居中内容 */
+  justify-content: center !important; /* 水平居中内容 */
+  user-select: none !important; /* 防止用户选择文本 */
 }
 
 /* Lottie 动画容器样式 */

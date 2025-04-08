@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { motion } from "framer-motion";
 import "./ThemeToggle.css";
 
@@ -12,12 +12,18 @@ function ThemeToggle({ isDark, toggleTheme }) {
     x: isDark ? 100 : 0,
   };
 
-  const handleThemeClick = (isDarkTarget) => {
-    if (isDark !== isDarkTarget) toggleTheme();
-  };
+  // Make sure the toggle function is properly defined and used
+  const handleThemeClick = useCallback((isDarkTarget) => {
+    if (isDark !== isDarkTarget) {
+      // Direct call instead of indirect reference
+      toggleTheme();
+    }
+  }, [isDark, toggleTheme]);
+
+  console.log("ThemeToggle rendering with isDark:", isDark, "toggleTheme type:", typeof toggleTheme);
 
   return (
-    <div className="sidebar-footer">
+    <div className="sidebar-footer" onClick={(e) => e.stopPropagation()}>
       <div className="segment-control-outer">
         <div className="segment-control">
           <motion.div

@@ -181,10 +181,14 @@ form {
   margin-right: 8px;
 }
 
+/* Fix for the remember-me text alignment */
 .remember-me-text {
   font-size: 14px;
   color: #555;
   cursor: pointer;
+  display: inline-block;
+  line-height: 20px; /* Match the height of the checkbox */
+  margin-left: 8px;
 }
 
 .checkbox-label input {
@@ -199,7 +203,6 @@ form {
   display: inline-block;
   width: 18px;
   height: 18px;
-  margin-right: 8px;
   border: 1px solid #ccc;
   border-radius: 3px;
   background-color: white;

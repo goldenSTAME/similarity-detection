@@ -27,8 +27,16 @@ const menuItems = [
   { name: "Support", animation: null },
 ];
 
-// 更新函数参数，添加 user 和 onLogout
-function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow, user, onLogout }) {
+// 更新函数参数，添加 allowThemeToggleOnly 来控制菜单项的可用性
+function Sidebar({ 
+  isDark, 
+  toggleTheme, 
+  activeWindow, 
+  setActiveWindow, 
+  user, 
+  onLogout, 
+  allowThemeToggleOnly = false 
+}) {
   const [isLottiePlaying, setIsLottiePlaying] = useState({
     "Select Image": false,
     "History": false,
@@ -125,20 +133,28 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow, user, onL
   };
 
   const handleItemClick = (itemName) => {
+    // 如果只允许主题切换，则重定向所有点击到 setActiveWindow (已设置为 handleLoginClick)
     setActiveWindow(itemName);
-    if (itemName === "Select Image") {
-      navigate("/select-image"); // 跳转到 SelectImageWindow
-    } else if (itemName === "History") {
-      navigate("/history"); // 跳转到 History 页面
-    } else if (itemName === "Details") {
-      navigate("/details"); // 跳转到 Details 页面
-    } else if (itemName === "Logs") {
-      navigate("/logs"); // 跳转到 Logs 页面
+    
+    // 只有在未被锁定时才执行导航
+    if (!allowThemeToggleOnly) {
+      if (itemName === "Select Image") {
+        navigate("/select-image"); // 跳转到 SelectImageWindow
+      } else if (itemName === "History") {
+        navigate("/history"); // 跳转到 History 页面
+      } else if (itemName === "Details") {
+        navigate("/details"); // 跳转到 Details 页面
+      } else if (itemName === "Logs") {
+        navigate("/logs"); // 跳转到 Logs 页面
+      }
     }
   };
 
   // 点击菜单项时触发的函数，确保倍速播放且动画不被打断
   const handleItemMouseDown = (itemName) => {
+    // 在锁定模式下，不播放动画
+    if (allowThemeToggleOnly) return;
+    
     const anim = lottieRefs.current[itemName];
     if (!anim) {
       console.error(`动画实例 ${itemName} 不存在`);
@@ -180,6 +196,11 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow, user, onL
     }, 8000);
   };
 
+  // 检查菜单项是否应禁用
+  const isItemDisabled = (itemName) => {
+    return allowThemeToggleOnly && itemName !== "Theme Toggle";
+  };
+
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
       {/* 头部 Logo，使用 APNG 动画或 fallback 图片 */}
@@ -207,15 +228,15 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow, user, onL
         </div>
       </div>
 
-      {/* 菜单区域 */}
-      <nav className="sidebar-menu">
+      {/* 菜单区域 - 当allowThemeToggleOnly为true时，菜单项被禁用 */}
+      <nav className={`sidebar-menu ${allowThemeToggleOnly ? 'menu-disabled' : ''}`}>
         <ul className="menu-list">
           {menuItems.map((item, index) => (
             <React.Fragment key={item.name}>
               <li
                 className={`menu-item ${
                   activeWindow === item.name ? "active" : ""
-                }`}
+                } ${isItemDisabled(item.name) ? "disabled" : ""}`}
                 onClick={() => handleItemClick(item.name)}
                 onMouseDown={() =>
                   item.animation && handleItemMouseDown(item.name)
@@ -238,8 +259,10 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow, user, onL
         </ul>
       </nav>
 
-      {/* 主题切换按钮 - 独立组件 */}
-      <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
+      {/* 主题切换按钮 - 独立组件，始终保持可用 */}
+      <div className="sidebar-footer">
+        <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
+      </div>
     </aside>
   );
 }

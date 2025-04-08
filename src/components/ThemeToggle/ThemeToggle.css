@@ -10,6 +10,7 @@
   margin: 0 auto;
   overflow: visible;
   border-radius: 10px;
+  z-index: 100; /* Ensure it's above other elements */
 }
 
 /* 背景 */
@@ -23,6 +24,7 @@
   border-radius: 10px;
   background-color: #e0e0e0;
   z-index: 0;
+  transition: background-color 0.5s ease; /* Add theme transition */
 }
 .dark-mode .segment-control-outer::before {
   background-color: #444;
@@ -49,6 +51,8 @@
   height: 100%;
   background-color: #fff;
   border-radius: 10px;
+  transition: background-color 0.5s ease; /* Add theme transition */
+  z-index: 1; /* Ensure above other elements */
 }
 
 /* 按钮 */
@@ -66,11 +70,14 @@
   gap: 5px;
   padding: 0;
   outline: none;
+  transition: color 0.5s ease; /* Add theme transition */
+  position: relative;
 }
 
 .segment-button.active {
   color: #000;
   font-weight: normal;
+  transition: color 0.5s ease; /* Add theme transition */
 }
 
 .dark-mode .slider {
@@ -90,6 +97,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: color 0.5s ease; /* Add theme transition */
 }
 
 /* 内嵌矢量图 */
@@ -97,4 +105,18 @@
   width: 16px;
   height: 16px;
   margin-right: 4px;
+  transition: fill 0.5s ease, stroke 0.5s ease; /* Add theme transition */
+}
+
+/* Special case: Override any sidebar pointer-events issues */
+.sidebar-footer {
+  /* Critical to allow clicking */
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  user-select: none;
+  position: relative;
+  z-index: 1001; /* Ensure it's above other elements */
+  padding: 10px 0;
+  transition: none; /* No transition needed - always visible */
 }

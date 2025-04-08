@@ -219,8 +219,8 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose, isDark })
                   id="remember-me"
                 />
                 <span className="checkbox-custom"></span>
+                <span className="remember-me-text">Remember me</span>
               </label>
-              <label htmlFor="remember-me" className="remember-me-text">Remember me</label>
             </div>
           </div>
 

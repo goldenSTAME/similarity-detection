@@ -1,6 +1,6 @@
 // src/App.tsx
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SelectImageWindow from "./components/SelectImageWindow/SelectImageWindow";
 import DetailWindow from "./components/DetailWindow/DetailWindow";
@@ -31,12 +31,12 @@ function App() {
     const verifyAuth = async () => {
       setIsCheckingAuth(true);
 
-      // Try to read from cookie first
-      const cookieUser = getUser();
+      // Try to get user from localStorage
+      const localUser = getUser();
 
-      if (cookieUser) {
-        // If user info exists in cookie, use it first
-        setUser(cookieUser);
+      if (localUser) {
+        // If user info exists in localStorage, use it first
+        setUser(localUser);
         setIsAuthenticated(true);
         setShowLoginOverlay(false);
 
@@ -47,6 +47,11 @@ function App() {
           setIsAuthenticated(false);
           setUser(null);
           setShowLoginOverlay(true);
+
+          // Clear localStorage
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
         }
       } else {
         setIsAuthenticated(false);
@@ -109,13 +114,6 @@ function App() {
           user={user}
           onLogout={handleLogout}
         />
-
-        {isAuthenticated && user && (
-          <UserProfile
-            user={user}
-            onLogout={handleLogout}
-          />
-        )}
 
         <main className={`main-content ${!isAuthenticated ? 'blurred' : ''}`}>
           <Routes>

@@ -1,3 +1,4 @@
+/* src/components/Auth/LoginOverlay.css */
 .login-overlay {
   position: fixed;
   top: 0;
@@ -26,6 +27,7 @@
   max-width: 90%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.4s ease-out;
+  text-align: center;
 }
 
 @keyframes slideUp {
@@ -49,6 +51,7 @@
 
 .form-group {
   margin-bottom: 24px;
+  text-align: left;
 }
 
 .form-group label {
@@ -58,13 +61,24 @@
   color: #444;
 }
 
-.form-group input {
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
+}
+
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="text"] {
+  width: 100%;
+  height: 48px;
   padding: 12px 15px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 16px;
   transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
 }
 
 .form-group input:focus {
@@ -73,9 +87,125 @@
   outline: none;
 }
 
+.password-input-container {
+  position: relative;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.3s;
+  padding: 5px;
+}
+
+.password-toggle-btn:hover {
+  color: #333;
+}
+
+.eye-icon-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+.eye-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.eye-icon.hidden {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.eye-icon.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.remember-me-container {
+  display: flex;
+  align-items: center;
+  margin-top: -8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  color: #555;
+}
+
+.checkbox-label input {
+  position: absolute;
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+
+.checkbox-custom {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.checkbox-label input:checked ~ .checkbox-custom {
+  background-color: #1e90ff;
+  border-color: #1e90ff;
+}
+
+.checkbox-label input:checked ~ .checkbox-custom:after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.input-validation-message {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+  color: #856404;
+  background-color: #fff3cd;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.input-validation-message svg {
+  color: #856404;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
 .login-button {
   width: 100%;
-  padding: 14px;
+  height: 48px;
+  padding: 12px 15px;
   background-color: #1e90ff;
   color: white;
   border: none;
@@ -104,40 +234,10 @@
   border-radius: 6px;
   border-left: 4px solid #dc3545;
   font-size: 14px;
+  text-align: left;
 }
 
-.test-accounts {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-  font-size: 14px;
-}
-
-.test-accounts p {
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.account-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.account-type {
-  font-weight: 600;
-  color: #444;
-}
-
-.account-credentials {
-  color: #666;
-  font-family: monospace;
-  background-color: #f5f5f5;
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-
-/* 深色模式适配 */
+/* Dark mode styles */
 .dark .login-container {
   background-color: #222;
   color: #eee;
@@ -155,7 +255,9 @@
   color: #ccc;
 }
 
-.dark .form-group input {
+.dark .form-group input[type="email"],
+.dark .form-group input[type="password"],
+.dark .form-group input[type="text"] {
   background-color: #333;
   border-color: #444;
   color: #eee;
@@ -166,27 +268,41 @@
   box-shadow: 0 0 0 2px rgba(75, 150, 243, 0.3);
 }
 
+.dark .password-toggle-btn {
+  color: #aaa;
+}
+
+.dark .password-toggle-btn:hover {
+  color: #ddd;
+}
+
+.dark .checkbox-label {
+  color: #bbb;
+}
+
+.dark .checkbox-custom {
+  background-color: #333;
+  border-color: #555;
+}
+
+.dark .checkbox-label input:checked ~ .checkbox-custom {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.dark .input-validation-message {
+  color: #ffe69c;
+  background-color: #3a3118;
+}
+
+.dark .input-validation-message svg {
+  color: #ffe69c;
+}
+
 .dark .login-button {
   background-color: #0d6efd;
 }
 
 .dark .login-button:hover {
   background-color: #0b5ed7;
-}
-
-.dark .test-accounts {
-  border-top-color: #444;
-}
-
-.dark .test-accounts p {
-  color: #aaa;
-}
-
-.dark .account-type {
-  color: #ddd;
-}
-
-.dark .account-credentials {
-  color: #ccc;
-  background-color: #333;
 }

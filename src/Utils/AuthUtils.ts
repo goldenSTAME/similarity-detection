@@ -1,33 +1,42 @@
+// src/utils/AuthUtils.ts
 export interface UserData {
   id: string;
   email: string;
   role: string;
 }
 
-export const getCookie = (name: string): string | null => {
-  const cookies = document.cookie.split(';');
-  for (let cookie of cookies) {
-    const [cookieName, cookieValue] = cookie.trim().split('=');
-    if (cookieName === name) {
-      return decodeURIComponent(cookieValue);
-    }
-  }
-  return null;
-};
-
 export const getAuthToken = (): string | null => {
-  return getCookie('authToken');
+  // Try sessionStorage first (for non-remember-me sessions)
+  const sessionToken = sessionStorage.getItem('authToken');
+  if (sessionToken) {
+    return sessionToken;
+  }
+
+  // Then try localStorage (for remember-me sessions)
+  return localStorage.getItem('authToken');
 };
 
 export const getUser = (): UserData | null => {
-  const userCookie = getCookie('user');
-  if (userCookie) {
+  // Try to get user from sessionStorage first
+  const sessionUser = sessionStorage.getItem('user');
+  if (sessionUser) {
     try {
-      return JSON.parse(userCookie);
+      return JSON.parse(sessionUser);
     } catch (error) {
-      console.error('Failed to parse user data from cookie:', error);
+      console.error('Failed to parse user data from sessionStorage:', error);
     }
   }
+
+  // Then try localStorage
+  const localUser = localStorage.getItem('user');
+  if (localUser) {
+    try {
+      return JSON.parse(localUser);
+    } catch (error) {
+      console.error('Failed to parse user data from localStorage:', error);
+    }
+  }
+
   return null;
 };
 
@@ -42,8 +51,7 @@ export const checkAuth = async (): Promise<UserData | null> => {
     const response = await fetch('http://localhost:5001/api/auth/user', {
       headers: {
         'Authorization': `Bearer ${authToken}`
-      },
-      credentials: 'include'
+      }
     });
 
     const data = await response.json();
@@ -56,4 +64,13 @@ export const checkAuth = async (): Promise<UserData | null> => {
     console.error('Failed to verify authentication:', error);
     return null;
   }
+};
+
+export const clearAuth = (): void => {
+  // Clear both storages to ensure complete logout
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+  sessionStorage.removeItem('authToken');
+  sessionStorage.removeItem('user');
 };

@@ -1,3 +1,4 @@
+// src/components/Auth/UserProfile.tsx
 import React, { useState } from 'react';
 import './UserProfile.css';
 
@@ -23,16 +24,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onLogout }) => {
     try {
       await fetch('http://localhost:5001/api/auth/logout', {
         method: 'POST',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
       });
     } catch (error) {
       console.error('Logout request error:', error);
     }
 
-    // Clear cookies
-    document.cookie = 'authToken=; path=/; max-age=0';
-    document.cookie = 'refreshToken=; path=/; max-age=0';
-    document.cookie = 'user=; path=/; max-age=0';
+    // Clear localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
 
     // Call parent component's logout handler
     onLogout();

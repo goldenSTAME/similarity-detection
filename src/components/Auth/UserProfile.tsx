@@ -1,5 +1,5 @@
 // src/components/Auth/UserProfile.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './UserProfile.css';
 
 interface UserData {
@@ -15,6 +15,29 @@ interface UserProfileProps {
 
 const UserProfile: React.FC<UserProfileProps> = ({ user, onLogout }) => {
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const avatarRef = useRef<HTMLDivElement>(null);
+
+  // Handle clicks outside of the dropdown to close it
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        avatarRef.current &&
+        !avatarRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+
+    // Add event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Remove event listener on cleanup
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef, avatarRef]);
 
   const handleLogout = async () => {
     // Clear history records from localStorage first
@@ -32,10 +55,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onLogout }) => {
       console.error('Logout request error:', error);
     }
 
-    // Clear localStorage
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    // Close dropdown
+    setShowDropdown(false);
 
     // Call parent component's logout handler
     onLogout();
@@ -47,7 +68,12 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onLogout }) => {
 
   return (
     <div className="user-profile">
-      <div className="user-avatar" onClick={toggleDropdown}>
+      <div
+        className="user-avatar"
+        onClick={toggleDropdown}
+        ref={avatarRef}
+        data-testid="user-avatar"
+      >
         {user.email.charAt(0).toUpperCase()}
         <div className={`role-indicator ${user.role === 'admin' ? 'admin' : 'user'}`}>
           {user.role === 'admin' ? 'A' : 'U'}
@@ -55,7 +81,11 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onLogout }) => {
       </div>
 
       {showDropdown && (
-        <div className="profile-dropdown">
+        <div
+          className="profile-dropdown"
+          ref={dropdownRef}
+          data-testid="profile-dropdown"
+        >
           <div className="user-info">
             <div className="user-email">{user.email}</div>
             <div className="user-role">

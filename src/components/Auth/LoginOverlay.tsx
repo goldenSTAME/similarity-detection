@@ -1,5 +1,5 @@
 // src/components/Auth/LoginOverlay.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './LoginOverlay.css';
 
 interface LoginResponse {
@@ -17,9 +17,10 @@ interface LoginResponse {
 interface LoginOverlayProps {
   onLogin: (userData: any) => void;
   onClose: () => void;
+  isDark?: boolean;
 }
 
-const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose }) => {
+const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose, isDark }) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -27,6 +28,13 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose }) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<{email?: string, password?: string}>({});
+  const [fadeIn, setFadeIn] = useState<boolean>(false);
+
+  // Fade in animation when component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => setFadeIn(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const validateForm = (): boolean => {
     const errors: {email?: string, password?: string} = {};
@@ -111,10 +119,28 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose }) => {
     setShowPassword(!showPassword);
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only close if clicking the backdrop, not the content
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="login-overlay">
+    <div
+      className={`login-overlay ${fadeIn ? 'fade-in' : ''} ${isDark ? 'dark' : ''}`}
+      onClick={handleBackdropClick}
+    >
       <div className="login-container">
-        <h2>Image Similarity Detection System</h2>
+        <div className="login-header">
+          <h2>Image Similarity Detection System</h2>
+          <button className="close-button" onClick={onClose} aria-label="Close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
         <div className="login-subtitle">Please login to continue</div>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -129,7 +155,6 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                // Removed noValidate from individual input
               />
             </div>
             {validationErrors.email && (
@@ -153,7 +178,6 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                // Removed noValidate from individual input
               />
               <button
                 type="button"
@@ -186,15 +210,18 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose }) => {
           </div>
 
           <div className="form-group remember-me-container">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={() => setRememberMe(!rememberMe)}
-              />
-              <span className="checkbox-custom"></span>
-              Remember me
-            </label>
+            <div className="checkbox-wrapper">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={() => setRememberMe(!rememberMe)}
+                  id="remember-me"
+                />
+                <span className="checkbox-custom"></span>
+              </label>
+              <label htmlFor="remember-me" className="remember-me-text">Remember me</label>
+            </div>
           </div>
 
           <button
@@ -202,7 +229,14 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose }) => {
             className={`login-button ${isLoading ? 'loading' : ''}`}
             disabled={isLoading}
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? (
+              <>
+                <span>Logging in</span>
+                <div className="button-spinner"></div>
+              </>
+            ) : (
+              'Login'
+            )}
           </button>
         </form>
       </div>

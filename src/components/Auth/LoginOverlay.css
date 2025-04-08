@@ -5,29 +5,61 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(8px);
-  animation: fadeIn 0.3s ease-out;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.login-overlay.fade-in {
+  opacity: 1;
 }
 
 .login-container {
   background-color: white;
   border-radius: 12px;
-  padding: 40px;
   width: 420px;
   max-width: 90%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.4s ease-out;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 0 20px;
+}
+
+.login-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.close-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
 }
 
 @keyframes slideUp {
@@ -35,18 +67,15 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-.login-container h2 {
-  text-align: center;
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: #333;
-  font-size: 24px;
-}
-
 .login-subtitle {
   text-align: center;
   color: #666;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+form {
+  padding: 0 40px 40px 40px;
 }
 
 .form-group {
@@ -135,9 +164,13 @@
 }
 
 .remember-me-container {
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+
+.checkbox-wrapper {
   display: flex;
   align-items: center;
-  margin-top: -8px;
 }
 
 .checkbox-label {
@@ -145,8 +178,13 @@
   align-items: center;
   cursor: pointer;
   user-select: none;
+  margin-right: 8px;
+}
+
+.remember-me-text {
   font-size: 14px;
   color: #555;
+  cursor: pointer;
 }
 
 .checkbox-label input {
@@ -215,6 +253,10 @@
   cursor: pointer;
   transition: background-color 0.3s;
   margin-top: 10px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .login-button:hover {
@@ -224,6 +266,21 @@
 .login-button.loading {
   background-color: #6c757d;
   cursor: not-allowed;
+}
+
+/* New, improved loading spinner */
+.button-spinner {
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .error-message {
@@ -243,7 +300,16 @@
   color: #eee;
 }
 
-.dark .login-container h2 {
+.dark .login-header h2 {
+  color: #eee;
+}
+
+.dark .close-button {
+  color: #aaa;
+}
+
+.dark .close-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
   color: #eee;
 }
 
@@ -280,6 +346,10 @@
   color: #bbb;
 }
 
+.dark .remember-me-text {
+  color: #bbb;
+}
+
 .dark .checkbox-custom {
   background-color: #333;
   border-color: #555;
@@ -305,4 +375,14 @@
 
 .dark .login-button:hover {
   background-color: #0b5ed7;
+}
+
+.dark .login-button.loading {
+  background-color: #495057;
+}
+
+.dark .error-message {
+  background-color: #2c161a;
+  border-color: #842029;
+  color: #ea868f;
 }

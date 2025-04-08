@@ -7,6 +7,7 @@
   font-family: sans-serif;
   margin: 0;
   transition: background-color 0.5s ease, color 0.5s ease;
+  position: relative;
 }
 
 /* 主内容区域 */
@@ -28,6 +29,155 @@
 .main-subtitle {
   color: #666;
   margin-bottom: 2rem;
+}
+
+/* Top right authentication button/profile */
+.top-right-auth {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
+.login-button-topright {
+  padding: 8px 16px;
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.login-button-topright:hover {
+  background-color: #0077e6;
+  transform: translateY(-2px);
+}
+
+.dark .login-button-topright {
+  background-color: #0d6efd;
+}
+
+.dark .login-button-topright:hover {
+  background-color: #0b5ed7;
+}
+
+/* Loading screen styles */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  min-height: 300px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #1e90ff;
+  animation: spinner 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.dark .loading-spinner {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-top-color: #3391ff;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-screen p {
+  color: #666;
+  font-size: 16px;
+}
+
+.dark .loading-screen p {
+  color: #ccc;
+}
+
+/* Login prompt styles */
+.login-prompt {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  width: 100%;
+  animation: fadeIn 0.3s ease;
+}
+
+.login-prompt-content {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.dark .login-prompt-content {
+  background-color: #2a2a2a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.login-prompt h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.dark .login-prompt h2 {
+  color: #eee;
+}
+
+.login-prompt p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.dark .login-prompt p {
+  color: #aaa;
+}
+
+.login-prompt-button {
+  padding: 10px 20px;
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.login-prompt-button:hover {
+  background-color: #0077e6;
+  transform: scale(1.05);
+}
+
+.dark .login-prompt-button {
+  background-color: #0d6efd;
+}
+
+.dark .login-prompt-button:hover {
+  background-color: #0b5ed7;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* 全局变量与主题样式 */

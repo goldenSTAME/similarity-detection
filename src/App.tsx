@@ -10,6 +10,27 @@ import UserProfile from "./components/Auth/UserProfile";
 import { checkAuth, getUser, UserData } from "./Utils/AuthUtils";
 import "./App.css";
 
+// Improved loading animation component
+const LoadingAnimation = ({ isDark }: { isDark: boolean }) => (
+  <div className={`loading-screen ${isDark ? "dark" : "light"}`}>
+    <div className="loading-spinner"></div>
+    <p>Loading...</p>
+  </div>
+);
+
+// Login Prompt component for unauthenticated pages
+const LoginPrompt = ({ onLoginClick }: { onLoginClick: () => void }) => (
+  <div className="login-prompt">
+    <div className="login-prompt-content">
+      <h2>Please Login First</h2>
+      <p>You need to login to access this feature.</p>
+      <button className="login-prompt-button" onClick={onLoginClick}>
+        Login
+      </button>
+    </div>
+  </div>
+);
+
 function App() {
   const [activeWindow, setActiveWindow] = useState<string>("Select Image");
   const [isDark, setIsDark] = useState<boolean>(() => {
@@ -23,7 +44,7 @@ function App() {
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<UserData | null>(null);
-  const [showLoginOverlay, setShowLoginOverlay] = useState<boolean>(true);
+  const [showLoginOverlay, setShowLoginOverlay] = useState<boolean>(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
 
   // Verify authentication status
@@ -31,31 +52,22 @@ function App() {
     const verifyAuth = async () => {
       setIsCheckingAuth(true);
 
-      // Try to get user from localStorage
+      // Try to get user from localStorage or sessionStorage
       const localUser = getUser();
 
       if (localUser) {
-        // If user info exists in localStorage, use it first
+        // If user info exists, use it first
         setUser(localUser);
         setIsAuthenticated(true);
-        setShowLoginOverlay(false);
 
         // Then verify token validity with server
         const serverUser = await checkAuth();
         if (!serverUser) {
           // If server verification fails, log out the user
-          setIsAuthenticated(false);
-          setUser(null);
-          setShowLoginOverlay(true);
-
-          // Clear localStorage
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
+          handleLogout();
         }
       } else {
         setIsAuthenticated(false);
-        setShowLoginOverlay(true);
       }
 
       setIsCheckingAuth(false);
@@ -79,30 +91,54 @@ function App() {
   };
 
   const handleLogout = () => {
+    // Clear localStorage/sessionStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('user');
+    localStorage.removeItem('image_search_history');
+
     setIsAuthenticated(false);
     setUser(null);
+  };
+
+  const handleLoginClick = () => {
     setShowLoginOverlay(true);
   };
 
-  if (isCheckingAuth) {
-    // Show loading indicator
-    return (
-      <div className={`app-container ${isDark ? "dark" : "light"}`}>
-        <div className="loading-screen">
-          <div className="loading-spinner"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  // Content component that either shows actual content or login prompt
+  const AuthenticatedContent = ({ children }: { children: React.ReactNode }) => {
+    if (!isAuthenticated) {
+      return <LoginPrompt onLoginClick={handleLoginClick} />;
+    }
+    return <>{children}</>;
+  };
 
   return (
     <Router>
       <div className={`app-container ${isDark ? "dark" : "light"}`}>
+        {/* Login button or user profile in the top-right corner */}
+        <div className="top-right-auth">
+          {isAuthenticated && user ? (
+            <UserProfile user={user} onLogout={handleLogout} />
+          ) : (
+            <button
+              className="login-button-topright"
+              onClick={handleLoginClick}
+              aria-label="Login"
+            >
+              Login
+            </button>
+          )}
+        </div>
+
+        {/* Login overlay */}
         {showLoginOverlay && (
           <LoginOverlay
             onLogin={handleLogin}
-            onClose={() => {}} // Login overlay cannot be closed
+            onClose={() => setShowLoginOverlay(false)}
+            isDark={isDark}
           />
         )}
 
@@ -115,13 +151,33 @@ function App() {
           onLogout={handleLogout}
         />
 
-        <main className={`main-content ${!isAuthenticated ? 'blurred' : ''}`}>
-          <Routes>
-            <Route path="/" element={<SelectImageWindow />} />
-            <Route path="/select-image" element={<SelectImageWindow />} />
-            <Route path="/history" element={<HistoryWindow />} />
-            <Route path="/details/:imageId?" element={<DetailWindow />} />
-          </Routes>
+        <main className="main-content">
+          {isCheckingAuth ? (
+            <LoadingAnimation isDark={isDark} />
+          ) : (
+            <Routes>
+              <Route path="/" element={
+                <AuthenticatedContent>
+                  <SelectImageWindow />
+                </AuthenticatedContent>
+              } />
+              <Route path="/select-image" element={
+                <AuthenticatedContent>
+                  <SelectImageWindow />
+                </AuthenticatedContent>
+              } />
+              <Route path="/history" element={
+                <AuthenticatedContent>
+                  <HistoryWindow />
+                </AuthenticatedContent>
+              } />
+              <Route path="/details/:imageId?" element={
+                <AuthenticatedContent>
+                  <DetailWindow />
+                </AuthenticatedContent>
+              } />
+            </Routes>
+          )}
         </main>
       </div>
     </Router>

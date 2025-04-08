@@ -1,7 +1,9 @@
 // src/App.js (modifications only)
 import React, {useEffect, useState} from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate} from "react-router-dom";
 import Sidebar from "./components/Sidebar/Sidebar";
+import LoginPage from "./components/LoginPage/LoginPage";
+import RegisterPage from "./components/RegisterPage/RegisterPage";
 import SelectImageWindow from "./components/SelectImageWindow/SelectImageWindow";
 import DetailWindow from "./components/DetailWindow/DetailWindow";
 import HistoryWindow from "./components/HistoryWindow/HistoryWindow"; // Add import
@@ -43,6 +45,9 @@ const [activeWindow, setActiveWindow] = useState("Select Image");
 // 新增 AppContent 组件处理路由和位置更新
 function AppContent({ activeWindow, setActiveWindow, isDark, toggleTheme }) {
   const location = useLocation(); // useLocation() 被放在这里，确保在 Router 组件内
+  const navigate = useNavigate();
+
+  const isLoggedIn = !!localStorage.getItem("auth_token");
 
   // 路由变化时更新 activeWindow
   useEffect(() => {
@@ -66,10 +71,32 @@ function AppContent({ activeWindow, setActiveWindow, isDark, toggleTheme }) {
         />
         <main className="main-content">
           <Routes>
-            <Route path="" element={<SelectImageWindow />} />
-            <Route path="/select-image" element={<SelectImageWindow />} />
-            <Route path="/history" element={<HistoryWindow />} />
-            <Route path="/details/:imageId?" element={<DetailWindow />} />
+            {/* 默认路径跳转到 login */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+
+            {/* 登录注册页 */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* 登录保护的页面 */}
+            <Route
+                path="/select-image"
+                element={
+                  isLoggedIn ? <SelectImageWindow /> : <Navigate to="/login" replace />
+                }
+            />
+            <Route
+                path="/history"
+                element={
+                  isLoggedIn ? <HistoryWindow /> : <Navigate to="/login" replace />
+                }
+            />
+            <Route
+                path="/details/:imageId?"
+                element={
+                  isLoggedIn ? <DetailWindow /> : <Navigate to="/login" replace />
+                }
+            />
           </Routes>
         </main>
       </div>

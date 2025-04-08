@@ -238,6 +238,57 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
       setShowApng(false);
     }, 8000);
   };
+
+  // 退出登录逻辑
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        navigate("/login");
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
+
+  // 自动检测 token 是否过期
+  const checkTokenValidity = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/auth/user", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status === 401) {
+        localStorage.removeItem("access_token");
+        navigate("/login");
+      }
+    } catch (err) {
+      console.error("Token verification failed", err);
+      navigate("/login");
+    }
+  };
+
+  useEffect(() => {
+    checkTokenValidity();
+  }, []);
+
   return (
     <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
       {/* 头部 Logo，使用 APNG 动画或 fallback 图片 */}
@@ -300,6 +351,11 @@ function Sidebar({ isDark, toggleTheme, activeWindow, setActiveWindow }) {
           ))}
         </ul>
       </nav>
+
+      {/*/!* 退出登录按钮 *!/*/}
+      {/*<div className="logout-btn" onClick={handleLogout}>*/}
+      {/*  退出登录*/}
+      {/*</div>*/}
 
       {/* 主题切换按钮 - 独立组件 */}
       <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />

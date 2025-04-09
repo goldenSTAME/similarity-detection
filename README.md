@@ -137,7 +137,7 @@ similarity-detection/
 │   │   ├── Update/         # Update feature component
 │   │   ├── ImageUtils.ts   # Image processing utilities
 │   │   └── ProcessBase64.js # Base64 image processing
-│   ├── App.js              # Main application component
+│   ├── App.tsx              # Main application component
 │   ├── App.css             # Global styles
 │   └── index.js            # Application entry point
 ├── .github/                # GitHub workflows

@@ -1,0 +1,389 @@
+/* src/components/Auth/LoginOverlay.css */
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.login-overlay.fade-in {
+  opacity: 1;
+}
+
+.login-container {
+  background-color: white;
+  border-radius: 12px;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease-out;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 0 20px;
+  position: relative; /* 添加相对定位 */
+}
+
+.login-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+  width: 100%; /* 让标题占据整个宽度 */
+  text-align: center; /* 使标题居中 */
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+  position: absolute; /* 绝对定位 */
+  right: 15px; /* 调整到右上角 */
+  top: 15px;
+  z-index: 10; /* 确保在其他元素上方 */
+}
+
+.close-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+form {
+  padding: 0 40px 40px 40px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #444;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="text"] {
+  width: 100%;
+  height: 48px;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.2);
+  outline: none;
+}
+
+.password-input-container {
+  position: relative;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.3s;
+  padding: 5px;
+}
+
+.password-toggle-btn:hover {
+  color: #333;
+}
+
+.eye-icon-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+.eye-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.eye-icon.hidden {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.eye-icon.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.remember-me-container {
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  margin-right: 8px;
+}
+
+.remember-me-text {
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 18px;
+  margin-left: 5px;
+  vertical-align: middle;
+  position: relative;
+  top: -4px;
+}
+
+.checkbox-label input {
+  position: absolute;
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+
+.checkbox-custom {
+  position: relative;
+  display: inline-block;
+  width: 14px; /* 减小复选框大小 */
+  height: 14px; /* 减小复选框大小 */
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.checkbox-label input:checked ~ .checkbox-custom {
+  background-color: #1e90ff;
+  border-color: #1e90ff;
+}
+
+.checkbox-label input:checked ~ .checkbox-custom:after {
+  content: '';
+  position: absolute;
+  left: 4px; /* 调整对钩位置 */
+  top: 1px; /* 调整对钩位置 */
+  width: 3px; /* 调整对钩大小 */
+  height: 7px; /* 调整对钩大小 */
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.input-validation-message {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+  color: #856404;
+  background-color: #fff3cd;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.input-validation-message svg {
+  color: #856404;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.login-button {
+  width: 100%;
+  height: 48px;
+  padding: 12px 15px;
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-button:hover {
+  background-color: #0077e6;
+}
+
+.login-button.loading {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* New, improved loading spinner */
+.button-spinner {
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-message {
+  color: #dc3545;
+  margin-bottom: 20px;
+  padding: 12px 15px;
+  background-color: #f8d7da;
+  border-radius: 6px;
+  border-left: 4px solid #dc3545;
+  font-size: 14px;
+  text-align: left;
+}
+
+/* Dark mode styles */
+.dark .login-container {
+  background-color: #222;
+  color: #eee;
+}
+
+.dark .login-header h2 {
+  color: #eee;
+}
+
+.dark .close-button {
+  color: #aaa;
+}
+
+.dark .close-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #eee;
+}
+
+.dark .form-group label {
+  color: #ccc;
+}
+
+.dark .form-group input[type="email"],
+.dark .form-group input[type="password"],
+.dark .form-group input[type="text"] {
+  background-color: #333;
+  border-color: #444;
+  color: #eee;
+}
+
+.dark .form-group input:focus {
+  border-color: #4b96f3;
+  box-shadow: 0 0 0 2px rgba(75, 150, 243, 0.3);
+}
+
+.dark .password-toggle-btn {
+  color: #aaa;
+}
+
+.dark .password-toggle-btn:hover {
+  color: #ddd;
+}
+
+.dark .checkbox-label {
+  color: #bbb;
+}
+
+.dark .remember-me-text {
+  color: #bbb;
+}
+
+.dark .checkbox-custom {
+  background-color: #333;
+  border-color: #555;
+}
+
+.dark .checkbox-label input:checked ~ .checkbox-custom {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.dark .input-validation-message {
+  color: #ffe69c;
+  background-color: #3a3118;
+}
+
+.dark .input-validation-message svg {
+  color: #ffe69c;
+}
+
+.dark .login-button {
+  background-color: #0d6efd;
+}
+
+.dark .login-button:hover {
+  background-color: #0b5ed7;
+}
+
+.dark .login-button.loading {
+  background-color: #495057;
+}
+
+.dark .error-message {
+  background-color: #2c161a;
+  border-color: #842029;
+  color: #ea868f;
+}

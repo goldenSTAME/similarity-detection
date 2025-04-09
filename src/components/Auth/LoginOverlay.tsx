@@ -119,11 +119,10 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose, isDark })
     setShowPassword(!showPassword);
   };
 
+  // 修改背景点击事件，不再关闭登录窗口
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only close if clicking the backdrop, not the content
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+    // 阻止事件冒泡，背景点击不会导致关闭
+    e.stopPropagation();
   };
 
   return (
@@ -133,7 +132,7 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose, isDark })
     >
       <div className="login-container">
         <div className="login-header">
-          <h2>Image Similarity Detection System</h2>
+          <h2>Login</h2>
           <button className="close-button" onClick={onClose} aria-label="Close">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -141,7 +140,6 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose, isDark })
             </svg>
           </button>
         </div>
-        <div className="login-subtitle">Please login to continue</div>
 
         <form onSubmit={handleSubmit} noValidate>
           {error && <div className="error-message">{error}</div>}

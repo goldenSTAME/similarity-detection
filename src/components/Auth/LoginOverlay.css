@@ -36,12 +36,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 20px 0 20px;
+  position: relative; /* 添加相对定位 */
 }
 
 .login-header h2 {
   margin: 0;
   font-size: 24px;
   color: #333;
+  width: 100%; /* 让标题占据整个宽度 */
+  text-align: center; /* 使标题居中 */
 }
 
 .close-button {
@@ -55,6 +58,10 @@
   justify-content: center;
   border-radius: 50%;
   transition: background-color 0.2s, color 0.2s;
+  position: absolute; /* 绝对定位 */
+  right: 15px; /* 调整到右上角 */
+  top: 15px;
+  z-index: 10; /* 确保在其他元素上方 */
 }
 
 .close-button:hover {
@@ -65,13 +72,6 @@
 @keyframes slideUp {
   from { transform: translateY(30px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
-}
-
-.login-subtitle {
-  text-align: center;
-  color: #666;
-  margin-bottom: 20px;
-  padding: 0 20px;
 }
 
 form {
@@ -181,14 +181,16 @@ form {
   margin-right: 8px;
 }
 
-/* Fix for the remember-me text alignment */
 .remember-me-text {
   font-size: 14px;
   color: #555;
   cursor: pointer;
   display: inline-block;
-  line-height: 20px; /* Match the height of the checkbox */
-  margin-left: 8px;
+  line-height: 18px;
+  margin-left: 5px;
+  vertical-align: middle;
+  position: relative;
+  top: -4px;
 }
 
 .checkbox-label input {
@@ -201,8 +203,8 @@ form {
 .checkbox-custom {
   position: relative;
   display: inline-block;
-  width: 18px;
-  height: 18px;
+  width: 14px; /* 减小复选框大小 */
+  height: 14px; /* 减小复选框大小 */
   border: 1px solid #ccc;
   border-radius: 3px;
   background-color: white;
@@ -217,10 +219,10 @@ form {
 .checkbox-label input:checked ~ .checkbox-custom:after {
   content: '';
   position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 4px;
-  height: 8px;
+  left: 4px; /* 调整对钩位置 */
+  top: 1px; /* 调整对钩位置 */
+  width: 3px; /* 调整对钩大小 */
+  height: 7px; /* 调整对钩大小 */
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
@@ -314,10 +316,6 @@ form {
 .dark .close-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
   color: #eee;
-}
-
-.dark .login-subtitle {
-  color: #aaa;
 }
 
 .dark .form-group label {

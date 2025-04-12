@@ -8,6 +8,7 @@ import HistoryWindow from "./components/HistoryWindow/HistoryWindow";
 import LoginOverlay from "./components/Auth/LoginOverlay";
 import UserProfile from "./components/Auth/UserProfile";
 import { checkAuth, getUser, UserData } from "./Utils/AuthUtils";
+import { HISTORY_STORAGE_KEY } from "./Utils/HistoryUtil"; // 导入历史记录存储键
 import "./App.css";
 
 // Improved loading animation component
@@ -77,6 +78,17 @@ function App() {
     const verifyAuth = async () => {
       setIsCheckingAuth(true);
 
+      // 检查是否存在历史记录但没有有效的认证信息
+      const historyExists = localStorage.getItem(HISTORY_STORAGE_KEY) !== null;
+      const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+      // 如果有历史记录但没有认证信息，说明是会话结束后的重新访问
+      // 这种情况下我们应该清除历史记录
+      if (historyExists && !authToken) {
+        console.log("检测到历史记录但没有认证信息，清除历史记录");
+        localStorage.removeItem(HISTORY_STORAGE_KEY);
+      }
+
       // Try to get user from localStorage or sessionStorage
       const localUser = getUser();
 
@@ -114,7 +126,7 @@ function App() {
     localStorage.removeItem('user');
     sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('user');
-    localStorage.removeItem('image_search_history');
+    localStorage.removeItem(HISTORY_STORAGE_KEY);
 
     setIsAuthenticated(false);
     setUser(null);

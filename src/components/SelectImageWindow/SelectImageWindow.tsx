@@ -102,6 +102,48 @@ function SelectImageWindow() {
 
   // Progress message timeout reference
   const progressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Add storage keys
+  const STORAGE_KEY_RESULTS = 'savedSearchResults';
+  const STORAGE_KEY_PREVIEW = 'savedImagePreview';
+  const STORAGE_KEY_PRESERVE = 'preserveSearchResults';
+
+  // Function to save search results to session storage
+  const saveResultsToSessionStorage = (results: ImageData[], preview: string | null) => {
+    if (results.length > 0 && preview) {
+      sessionStorage.setItem(STORAGE_KEY_RESULTS, JSON.stringify(results));
+      sessionStorage.setItem(STORAGE_KEY_PREVIEW, preview);
+    }
+  };
+
+  // Function to load search results from session storage
+  const loadResultsFromSessionStorage = () => {
+    const resultsJSON = sessionStorage.getItem(STORAGE_KEY_RESULTS);
+    const savedPreview = sessionStorage.getItem(STORAGE_KEY_PREVIEW);
+    const shouldPreserve = sessionStorage.getItem(STORAGE_KEY_PRESERVE);
+
+    if (shouldPreserve === 'true' && resultsJSON && savedPreview) {
+      try {
+        const loadedResults = JSON.parse(resultsJSON);
+        setSimilarImages(loadedResults);
+        setImagePreview(savedPreview);
+        setSearched(true);
+        
+        // Clear the preserve flag after loading
+        sessionStorage.removeItem(STORAGE_KEY_PRESERVE);
+        
+        return true;
+      } catch (error) {
+        console.error('Failed to parse saved results:', error);
+      }
+    }
+    return false;
+  };
+
+  // Load saved results on component mount
+  useEffect(() => {
+    loadResultsFromSessionStorage();
+  }, []);
 
   // Function to save search to history
   const saveSearchToHistory = (searchResults: ImageData[], imagePreview: string, imageName: string) => {
@@ -254,6 +296,9 @@ function SelectImageWindow() {
       if (results && imagePreview) {
         const fileName = image ? image.name : "Unknown Image";
         saveSearchToHistory(results, imagePreview, fileName);
+        
+        // Save results to session storage for persistence
+        saveResultsToSessionStorage(results, imagePreview);
       }
     } catch (error: any) {
       // Handle various error cases

@@ -1,42 +1,57 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import './ProgressTracker.css';
+import React from "react";
+import { motion } from "framer-motion";
+import "./ProgressTracker.css";
 
 // Define loading states
 export enum LoadingState {
-  IDLE = 'idle',
-  CONVERTING = 'converting',
-  EXTRACTING = 'extracting',
-  SEARCHING = 'searching',
-  FETCHING = 'fetching',
-  CANCELLED = 'cancelled',
-  ERROR = 'error'
+  IDLE = "idle",
+  CONVERTING = "converting",
+  SPLITTING = "splitting",
+  EXTRACTING = "extracting",
+  SEARCHING = "searching",
+  FETCHING = "fetching",
+  CANCELLED = "cancelled",
+  ERROR = "error",
 }
 
 interface ProgressTrackerProps {
   currentState: LoadingState;
   progressMessage: string;
   isLoading: boolean;
+  isSplitMode: boolean;
 }
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   currentState,
   progressMessage,
-  isLoading
+  isLoading,
+  isSplitMode,
 }) => {
-  // Define all the steps in order
-  const steps = [
-    { key: LoadingState.CONVERTING, label: "Converting Image" },
-    { key: LoadingState.EXTRACTING, label: "Extracting Features" },
-    { key: LoadingState.SEARCHING, label: "Finding Similar Images" },
-    { key: LoadingState.FETCHING, label: "Loading Results" }
-  ];
+  // Define steps based on mode
+  const steps = isSplitMode
+    ? [
+        { key: LoadingState.CONVERTING, label: "Converting Image" },
+        { key: LoadingState.SPLITTING, label: "Splitting Image" },
+        { key: LoadingState.EXTRACTING, label: "Extracting Features" },
+        { key: LoadingState.SEARCHING, label: "Finding Similar Images" },
+        { key: LoadingState.FETCHING, label: "Loading Results" },
+      ]
+    : [
+        { key: LoadingState.CONVERTING, label: "Converting Image" },
+        { key: LoadingState.EXTRACTING, label: "Extracting Features" },
+        { key: LoadingState.SEARCHING, label: "Finding Similar Images" },
+        { key: LoadingState.FETCHING, label: "Loading Results" },
+      ];
 
   // Find the current step index
-  const currentStepIndex = steps.findIndex(step => step.key === currentState);
+  const currentStepIndex = steps.findIndex((step) => step.key === currentState);
 
-  // Don't render if not loading
-  if (!isLoading && currentState !== LoadingState.ERROR && currentState !== LoadingState.CANCELLED) {
+  // Don't render if not loading and no specific states to show
+  if (
+    !isLoading &&
+    currentState !== LoadingState.ERROR &&
+    currentState !== LoadingState.CANCELLED
+  ) {
     return null;
   }
 
@@ -56,8 +71,10 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
           if (index === currentStepIndex) status = "active";
 
           // Special states
-          if (currentState === LoadingState.ERROR) status = index <= currentStepIndex ? "error" : "pending";
-          if (currentState === LoadingState.CANCELLED) status = index <= currentStepIndex ? "cancelled" : "pending";
+          if (currentState === LoadingState.ERROR)
+            status = index <= currentStepIndex ? "error" : "pending";
+          if (currentState === LoadingState.CANCELLED)
+            status = index <= currentStepIndex ? "cancelled" : "pending";
 
           return (
             <div key={step.key} className="step-container">
@@ -81,7 +98,11 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
               <div className={`step-label ${status}`}>{step.label}</div>
 
               {index < steps.length - 1 && (
-                <div className={`step-connector ${status === "completed" ? "completed" : ""}`}>
+                <div
+                  className={`step-connector ${
+                    status === "completed" ? "completed" : ""
+                  }`}
+                >
                   {status === "active" && (
                     <motion.div
                       className="progress-animation"
@@ -97,15 +118,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
         })}
       </div>
 
-      <div className="progress-message">
-        {currentState === LoadingState.ERROR ? (
-          <div className="error-message">Error: {progressMessage || "Processing failed"}</div>
-        ) : currentState === LoadingState.CANCELLED ? (
-          <div className="cancelled-message">Cancelled: Search was stopped</div>
-        ) : (
-          <div className="status-message">{progressMessage}</div>
-        )}
-      </div>
+      {/* No separate progress message */}
     </motion.div>
   );
 };

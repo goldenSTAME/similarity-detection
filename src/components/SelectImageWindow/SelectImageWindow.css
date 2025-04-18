@@ -12,6 +12,7 @@
 /* Content area */
 .content {
   flex: 1;
+  overflow-x: hidden;
 }
 
 /* Animation container */
@@ -19,11 +20,19 @@
   position: relative;
   margin-top: 20px;
   min-height: 320px; /* Minimum height when empty */
+  overflow-x: hidden; /* Prevent horizontal scrollbar */
 }
 
 .animation-container.fixed-height {
   min-height: 380px; /* Increased for loading state */
   overflow: hidden;
+}
+
+/* Split mode styling to prevent double scrollbars */
+.animation-container.split-mode {
+  overflow-y: visible; /* Allow content to flow naturally */
+  overflow-x: hidden;
+  padding-bottom: 20px; /* Add some spacing */
 }
 
 /* Wrapper containers for clean animations */
@@ -41,10 +50,40 @@
   align-items: center;
 }
 
+.lottie-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  z-index: 10;
+}
+
 /* Fixed absolute positioning for Progress Tracker to appear below Lottie */
 .progress-wrapper {
-  top: 220px; /* Position below the Lottie animation */
+  top: 180px; /* Adjusted position below the Lottie animation */
   z-index: 5;
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Progress tracker should be the only element showing the current step */
+.progress-tracker {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 10px 0;
+}
+
+/* Split results should not display when still loading */
+.animation-container.split-mode .split-results-vertical {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.animation-container.split-mode:not(.loading) .split-results-vertical {
+  opacity: 1;
 }
 
 /* Crop and center Lottie animation */
@@ -143,7 +182,7 @@
 /* Modified spinner to take up less horizontal space */
 .select-image-window .action-section button.loading::after,
 .select-image-window .upload-zone button.loading::after {
-  content: '';
+  content: "";
   display: inline-block;
   width: 14px; /* Slightly smaller spinner */
   height: 14px;
@@ -225,4 +264,419 @@
 .dark .cancel-text.disabled {
   color: #6c757d;
   opacity: 0.5;
+}
+
+/* Add styles for the Split Image button */
+.split-button {
+  background-color: #6c5ce7;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-right: 10px;
+}
+
+.split-button:hover {
+  background-color: #5649c0;
+}
+
+.split-button.active {
+  background-color: #5649c0;
+  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+}
+
+.split-button:disabled {
+  background-color: #a29bde;
+  cursor: not-allowed;
+}
+
+/* Split Images Gallery */
+.split-images-gallery {
+  width: 100%;
+  margin-top: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.split-images-gallery h3 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.segments-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.segment-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  aspect-ratio: 3/4;
+}
+
+.segment-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.segment-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.segment-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 0;
+  text-align: center;
+  font-size: 14px;
+  transform: translateY(0); /* Always visible */
+  transition: background-color 0.3s;
+}
+
+.segment-item:hover .segment-overlay {
+  background-color: rgba(108, 92, 231, 0.85);
+}
+
+/* Remove the animation since we're not showing "Searching..." text by default */
+.segment-overlay span {
+  display: inline-block;
+  position: relative;
+}
+
+/* Add a searched class to indicate completed search */
+.segment-item.searched .segment-overlay {
+  background-color: rgba(76, 175, 80, 0.7);
+}
+
+.split-results-wrapper {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* Vertical layout styles for segments with results */
+.split-results-vertical {
+  width: 100%;
+  padding: 20px 0;
+  overflow-x: hidden; /* Prevent horizontal overflow */
+}
+
+.segments-title {
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: left;
+}
+
+.segments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+}
+
+.segment-wrapper {
+  position: relative;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s;
+}
+
+.segment-wrapper.currently-searching {
+  box-shadow: 0 0 0 2px #6c5ce7, 0 4px 15px rgba(108, 92, 231, 0.2);
+}
+
+.segment-with-results {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.segment-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.segment-container h3 {
+  font-size: 1.2rem;
+  color: #333;
+  margin: 0;
+  text-align: left;
+}
+
+.segment-image-container {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.segment-image-large {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  display: block;
+}
+
+.search-segment-button {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #6c5ce7;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.search-segment-button:hover {
+  background-color: #5649c0;
+}
+
+.segment-searching {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+}
+
+.segment-searching .spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+.segment-results {
+  width: 100%;
+}
+
+.segment-results h4 {
+  font-size: 1.1rem;
+  color: #555;
+  margin: 0 0 15px 0;
+  text-align: left;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  width: 100%;
+}
+
+.result-item {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.result-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Styling for clickable result items */
+.result-item.clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.result-item.clickable::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.result-item.clickable:hover::after {
+  opacity: 1;
+}
+
+.result-item.clickable:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.result-image {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  display: block;
+}
+
+.result-similarity {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 0;
+  text-align: center;
+  font-size: 12px;
+}
+
+.segment-error {
+  padding: 15px;
+  background-color: #ffebee;
+  border-radius: 6px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.segment-error p {
+  color: #d32f2f;
+  margin: 0;
+}
+
+.segment-error button {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.no-segment-results {
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  text-align: center;
+  color: #757575;
+}
+
+.initial-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background-color: rgba(245, 245, 245, 0.7);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  overflow: hidden; /* Prevent overflow */
+}
+
+.initial-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(108, 92, 231, 0.3);
+  border-top-color: #6c5ce7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+.initial-loading p {
+  color: #666;
+  font-size: 16px;
+  text-align: center;
+  margin: 0;
+}
+
+/* Dark mode adjustments */
+.dark .segment-wrapper {
+  background-color: #2d2d2d;
+}
+
+.dark .segment-container h3,
+.dark .segment-results h4,
+.dark .segments-title {
+  color: #e0e0e0;
+}
+
+.dark .segment-error {
+  background-color: #4a2c2c;
+}
+
+.dark .segment-error p {
+  color: #ff8a8a;
+}
+
+.dark .no-segment-results {
+  background-color: #2d2d2d;
+  color: #b0b0b0;
+}
+
+.dark .initial-loading {
+  background-color: #2d2d2d;
+}
+
+.dark .initial-loading p {
+  color: #b0b0b0;
+}
+
+/* Loading state management for animation container */
+.animation-container.loading {
+  min-height: 380px;
+}
+
+/* Only show one loading indicator at a time */
+.animation-container.loading.split-mode .split-results-vertical {
+  display: none;
+}
+
+/* Show results once loading is complete */
+.animation-container:not(.loading).split-mode .split-results-vertical {
+  display: block;
+}
+
+/* Ensure progress steps are evenly spaced */
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 }

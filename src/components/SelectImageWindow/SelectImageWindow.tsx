@@ -34,9 +34,9 @@ interface ImageData {
 // Define split image segment interface
 interface ImageSegment {
   image_base64: string;
-  results?: ImageData[]; // Add results to store search results for each segment
-  isSearching?: boolean; // Track search status
-  searchError?: string; // Track search errors
+  results?: ImageData[];
+  isSearching?: boolean;
+  searchError?: string;
 }
 
 // Bottom action section component
@@ -108,15 +108,12 @@ const SegmentWithResults: React.FC<{
   index: number;
   onSearch: (segmentIndex: number) => void;
 }> = ({ segment, index, onSearch }) => {
-  // Add useNavigate hook
   const navigate = useNavigate();
 
-  // Create safe image source with proper prefix if needed
   const imgSrc = segment.image_base64.startsWith("data:")
     ? segment.image_base64
     : `data:image/jpeg;base64,${segment.image_base64}`;
 
-  // Handle image click to navigate to details
   const handleImageClick = (imageId: string) => {
     navigate(`/details/${imageId}`);
   };
@@ -153,7 +150,6 @@ const SegmentWithResults: React.FC<{
         </div>
       </div>
 
-      {/* Results section */}
       {segment.results && segment.results.length > 0 && (
         <div className="segment-results">
           <h4>Similar Items</h4>
@@ -178,7 +174,6 @@ const SegmentWithResults: React.FC<{
         </div>
       )}
 
-      {/* Error message */}
       {segment.searchError && (
         <div className="segment-error">
           <p>Error: {segment.searchError}</p>
@@ -186,7 +181,6 @@ const SegmentWithResults: React.FC<{
         </div>
       )}
 
-      {/* No results message */}
       {segment.results && segment.results.length === 0 && (
         <div className="no-segment-results">
           <p>No similar items found</p>
@@ -214,23 +208,16 @@ function SelectImageWindow() {
   const [currentSearchingIndex, setCurrentSearchingIndex] =
     useState<number>(-1);
 
-  // References for scrolling and animation
   const contentRef = useRef<HTMLDivElement>(null);
   const animationContainerRef = useRef<HTMLDivElement>(null);
   const segmentRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  // AbortController reference
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  // Progress message timeout reference
   const progressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Add storage keys
   const STORAGE_KEY_RESULTS = "savedSearchResults";
   const STORAGE_KEY_PREVIEW = "savedImagePreview";
   const STORAGE_KEY_PRESERVE = "preserveSearchResults";
 
-  // Function to save search results to session storage
   const saveResultsToSessionStorage = (
     results: ImageData[],
     preview: string | null
@@ -241,7 +228,6 @@ function SelectImageWindow() {
     }
   };
 
-  // Function to load search results from session storage
   const loadResultsFromSessionStorage = () => {
     const resultsJSON = sessionStorage.getItem(STORAGE_KEY_RESULTS);
     const savedPreview = sessionStorage.getItem(STORAGE_KEY_PREVIEW);
@@ -253,10 +239,7 @@ function SelectImageWindow() {
         setSimilarImages(loadedResults);
         setImagePreview(savedPreview);
         setSearched(true);
-
-        // Clear the preserve flag after loading
         sessionStorage.removeItem(STORAGE_KEY_PRESERVE);
-
         return true;
       } catch (error) {
         console.error("Failed to parse saved results:", error);
@@ -265,39 +248,35 @@ function SelectImageWindow() {
     return false;
   };
 
-  // Load saved results on component mount
   useEffect(() => {
     loadResultsFromSessionStorage();
   }, []);
 
-  // Function to save search to history
+  // Updated saveSearchToHistory function
   const saveSearchToHistory = (
     searchResults: ImageData[],
     imagePreview: string,
-    imageName: string
+    imageName: string,
+    isSegmentSearch = false
   ) => {
     if (!searchResults || searchResults.length === 0 || !imagePreview) {
       console.log("Cannot save history: Missing data");
       return;
     }
 
-    // Find highest similarity from results
     const highestSimilarity = Math.max(
       ...searchResults.map((result) => result.similarity)
     );
 
-    // Generate unique ID for this search
     const searchId = `search_${Date.now()}_${Math.random()
       .toString(36)
       .substring(2, 9)}`;
 
-    // Create thumbnail from imagePreview by removing the data URL prefix
     let thumbnailBase64 = imagePreview;
     if (imagePreview.startsWith("data:")) {
       thumbnailBase64 = imagePreview.split(",")[1];
     }
 
-    // Create history item
     const historyItem: HistoricalSearch = {
       id: searchId,
       timestamp: Date.now(),
@@ -305,21 +284,20 @@ function SelectImageWindow() {
       highestSimilarity: highestSimilarity,
       searchResults: searchResults,
       thumbnailBase64: thumbnailBase64,
+      isSegmentSearch: isSegmentSearch
     };
 
-    // Use the shared history manager to save the item
     const savedCount = HistoryUtil.saveSearch(historyItem);
     console.log(`Search saved to history successfully (total: ${savedCount})`);
   };
 
-  // Search for a specific segment
+  // Updated searchSegment function
   const searchSegment = async (segmentIndex: number) => {
     if (segmentIndex < 0 || segmentIndex >= imageSegments.length) {
       console.error("Invalid segment index:", segmentIndex);
       return;
     }
 
-    // Update the segment to indicate searching
     setImageSegments((prevSegments) => {
       const updatedSegments = [...prevSegments];
       updatedSegments[segmentIndex] = {
@@ -332,15 +310,11 @@ function SelectImageWindow() {
 
     setCurrentSearchingIndex(segmentIndex);
 
-    // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
     try {
-      // Get the segment's image data
       const segment = imageSegments[segmentIndex];
-
-      // Get base64 image without data URL prefix if needed
       let imageData = segment.image_base64;
       if (imageData.startsWith("data:")) {
         imageData = imageData.split(",")[1];
@@ -354,14 +328,12 @@ function SelectImageWindow() {
         `Searching for segment ${segmentIndex} (data length: ${imageData.length})`
       );
 
-      // Search for similar images
       const results = await ImageUtils.uploadImage(
         imageData,
         numResults,
         signal
       );
 
-      // Update the segment with results
       setImageSegments((prevSegments) => {
         const updatedSegments = [...prevSegments];
         updatedSegments[segmentIndex] = {
@@ -372,14 +344,17 @@ function SelectImageWindow() {
         return updatedSegments;
       });
 
-      // Save to history
       const imgSrc = segment.image_base64.startsWith("data:")
         ? segment.image_base64
         : `data:image/jpeg;base64,${segment.image_base64}`;
 
-      saveSearchToHistory(results, imgSrc, `Split Segment ${segmentIndex + 1}`);
+      saveSearchToHistory(
+        results,
+        imgSrc,
+        `Split Segment ${segmentIndex + 1}`,
+        true
+      );
 
-      // Scroll to the segment
       setTimeout(() => {
         if (segmentRefs.current[segmentIndex]) {
           segmentRefs.current[segmentIndex]?.scrollIntoView({
@@ -389,19 +364,16 @@ function SelectImageWindow() {
         }
       }, 100);
 
-      // Start the next segment search automatically if available
       if (segmentIndex < imageSegments.length - 1) {
         setTimeout(() => {
           searchSegment(segmentIndex + 1);
         }, 500);
       } else {
-        // We're done with all segments
         setCurrentSearchingIndex(-1);
       }
     } catch (error: any) {
       console.error(`Search failed for segment ${segmentIndex}:`, error);
 
-      // Update the segment with error
       setImageSegments((prevSegments) => {
         const updatedSegments = [...prevSegments];
         updatedSegments[segmentIndex] = {
@@ -418,18 +390,15 @@ function SelectImageWindow() {
     }
   };
 
-  // Split image into segments
   const handleSplitImage = async () => {
     if (!imagePreview) {
       toast.warn("Please select an image first!");
       return;
     }
 
-    // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
-    // Reset state for new split operation
     setIsLoading(true);
     setLoadingState(LoadingState.CONVERTING);
     setImageSegments([]);
@@ -438,7 +407,6 @@ function SelectImageWindow() {
     updateProgressWithDelay("Converting image...");
 
     try {
-      // Get base64 image without data URL prefix
       let base64Image = imagePreview;
       if (base64Image.startsWith("data:")) {
         base64Image = base64Image.split(",")[1];
@@ -448,45 +416,35 @@ function SelectImageWindow() {
         throw new Error("Invalid image data");
       }
 
-      // Add a small delay to ensure the UI updates for conversion step
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Update to the splitting state
       setLoadingState(LoadingState.SPLITTING);
       updateProgressWithDelay("Splitting image...");
 
       console.log(`Sending image for split (length: ${base64Image.length})`);
 
-      // Split the image
       const segments = await ImageUtils.splitImage(base64Image, signal);
 
-      // Update to extracting features state
       setLoadingState(LoadingState.EXTRACTING);
       updateProgressWithDelay("Extracting features...");
 
-      // Add a small delay for the UI transition
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       setLoadingState(LoadingState.SEARCHING);
       updateProgressWithDelay("Finding similar images...");
 
-      // Add a small delay for the UI transition
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       setLoadingState(LoadingState.FETCHING);
       updateProgressWithDelay("Loading segments...");
 
-      // If split completed successfully
       if (segments && segments.length > 0) {
         console.log(`Found ${segments.length} segments`);
 
-        // Initialize segment refs array
         segmentRefs.current = Array(segments.length).fill(null);
 
-        // Set all segments at once
         setImageSegments(segments);
 
-        // Clear loading state as we're ready to show segments
         setLoadingState(LoadingState.IDLE);
         setIsLoading(false);
 
@@ -494,7 +452,6 @@ function SelectImageWindow() {
           `Image split into ${segments.length} segments successfully!`
         );
 
-        // Start searching the first segment after a short delay
         setTimeout(() => {
           searchSegment(0);
         }, 500);
@@ -505,7 +462,6 @@ function SelectImageWindow() {
         setIsLoading(false);
       }
     } catch (error: any) {
-      // Handle various error cases
       setLoadingState(
         error.message === "Request cancelled"
           ? LoadingState.CANCELLED
@@ -521,13 +477,10 @@ function SelectImageWindow() {
         setProgressMessage("Failed");
       }
 
-      // Set loading to false here
       setIsLoading(false);
     } finally {
-      // Only clean up the AbortController here
       abortControllerRef.current = null;
 
-      // Only reset loading state if there was an error or cancellation
       if (
         loadingState === LoadingState.CANCELLED ||
         loadingState === LoadingState.ERROR
@@ -540,7 +493,6 @@ function SelectImageWindow() {
     }
   };
 
-  // Update progress message with a slight delay
   const updateProgressWithDelay = (message: string) => {
     if (progressTimeoutRef.current) {
       clearTimeout(progressTimeoutRef.current);
@@ -551,7 +503,6 @@ function SelectImageWindow() {
     }, 100);
   };
 
-  // Cleanup progress message timeout on unmount
   useEffect(() => {
     return () => {
       if (progressTimeoutRef.current) {
@@ -560,7 +511,6 @@ function SelectImageWindow() {
     };
   }, []);
 
-  // Auto-scroll based on loading state
   useEffect(() => {
     if (isLoading && animationContainerRef.current) {
       animationContainerRef.current.scrollIntoView({
@@ -572,7 +522,6 @@ function SelectImageWindow() {
     }
   }, [isLoading]);
 
-  // Handle drag events
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(true);
@@ -600,11 +549,9 @@ function SelectImageWindow() {
     }
   };
 
-  // Process file: convert to Base64 and set preview
   const processFile = async (file: File) => {
     if (!validateFile(file)) return;
     setImage(file);
-    // Reset split mode and segments when a new image is loaded
     setIsSplitMode(false);
     setImageSegments([]);
     try {
@@ -616,18 +563,15 @@ function SelectImageWindow() {
     }
   };
 
-  // Handle search action
   const handleSearch = async () => {
     if (!imagePreview) {
       toast.warn("Please select an image first!");
       return;
     }
 
-    // Create a new AbortController
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
-    // Reset state for new search
     setIsLoading(true);
     setLoadingState(LoadingState.CONVERTING);
     setSimilarImages([]);
@@ -637,7 +581,6 @@ function SelectImageWindow() {
     updateProgressWithDelay("Converting image...");
 
     try {
-      // Get base64 image - already have it in imagePreview
       let base64Image = imagePreview;
       if (base64Image.startsWith("data:")) {
         base64Image = base64Image.split(",")[1];
@@ -646,13 +589,11 @@ function SelectImageWindow() {
       setLoadingState(LoadingState.EXTRACTING);
       updateProgressWithDelay("Extracting features...");
 
-      // Add a small delay to ensure the UI updates
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       setLoadingState(LoadingState.SEARCHING);
       updateProgressWithDelay("Searching similar images...");
 
-      // Upload and search for similar images
       const results = await ImageUtils.uploadImage(
         base64Image,
         numResults,
@@ -662,22 +603,18 @@ function SelectImageWindow() {
       setLoadingState(LoadingState.FETCHING);
       updateProgressWithDelay("Loading results...");
 
-      // If search completed successfully
       setSimilarImages(results);
       setSearched(true);
       setLoadingState(LoadingState.IDLE);
       toast.success("Search completed successfully!");
 
-      // Save to history
       if (results && imagePreview) {
         const fileName = image ? image.name : "Unknown Image";
         saveSearchToHistory(results, imagePreview, fileName);
 
-        // Save results to session storage for persistence
         saveResultsToSessionStorage(results, imagePreview);
       }
     } catch (error: any) {
-      // Handle various error cases
       setLoadingState(
         error.message === "Request cancelled"
           ? LoadingState.CANCELLED
@@ -696,7 +633,6 @@ function SelectImageWindow() {
       setSearched(true);
     } finally {
       setIsLoading(false);
-      // Delayed reset of loading state information
       setTimeout(() => {
         if (
           loadingState === LoadingState.CANCELLED ||
@@ -710,17 +646,14 @@ function SelectImageWindow() {
     }
   };
 
-  // Handle cancel search action
   const handleCancel = () => {
     if (!isLoading || !abortControllerRef.current) return;
 
     updateProgressWithDelay("Cancelling...");
 
-    // Cancel the request
     abortControllerRef.current.abort();
   };
 
-  // Validate file type
   const validateFile = (file: File): boolean => {
     const validTypes = ["image/jpeg"];
     if (!validTypes.includes(file.type)) {
@@ -743,14 +676,12 @@ function SelectImageWindow() {
           uploadedImage={imagePreview}
         />
 
-        {/* Animation and Results Container */}
         <div
           ref={animationContainerRef}
           className={`animation-container ${
             isLoading && !isSplitMode ? "fixed-height" : ""
           } ${isSplitMode ? "split-mode" : ""} ${isLoading ? "loading" : ""}`}
         >
-          {/* Lottie Animation */}
           <AnimatePresence mode="wait">
             {isLoading && (
               <motion.div
@@ -771,7 +702,6 @@ function SelectImageWindow() {
             )}
           </AnimatePresence>
 
-          {/* Progress Tracker */}
           <AnimatePresence mode="wait">
             {isLoading && (
               <motion.div
@@ -792,7 +722,6 @@ function SelectImageWindow() {
             )}
           </AnimatePresence>
 
-          {/* Split Image Results - Vertical Layout */}
           <AnimatePresence mode="wait">
             {isSplitMode && imageSegments.length > 0 && (
               <motion.div
@@ -832,7 +761,6 @@ function SelectImageWindow() {
             )}
           </AnimatePresence>
 
-          {/* Regular Search Results (when not in split mode) */}
           <AnimatePresence mode="wait">
             {!isLoading && !isSplitMode && similarImages.length > 0 && (
               <motion.div
@@ -848,7 +776,6 @@ function SelectImageWindow() {
             )}
           </AnimatePresence>
 
-          {/* No Results Message */}
           <AnimatePresence mode="wait">
             {!isLoading &&
               searched &&
@@ -867,7 +794,6 @@ function SelectImageWindow() {
               )}
           </AnimatePresence>
 
-          {/* No Split Segments Message */}
           <AnimatePresence mode="wait">
             {!isLoading && isSplitMode && imageSegments.length === 0 && (
               <motion.div
@@ -888,7 +814,6 @@ function SelectImageWindow() {
         </div>
       </div>
 
-      {/* Bottom Action Section */}
       <ActionSection
         isLoading={isLoading}
         loadingState={loadingState}
@@ -898,7 +823,6 @@ function SelectImageWindow() {
         isSplitMode={isSplitMode}
       />
 
-      {/* Toast container with custom classes applied */}
       <ToastContainer
         className="custom-toast-container"
         toastClassName="custom-toast"

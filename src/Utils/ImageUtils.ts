@@ -1,3 +1,5 @@
+import { getAuthToken } from './AuthUtils';
+
 export class ImageUtils {
   // Will be used to store the current request ID
   static currentRequestId: string | null = null;
@@ -36,10 +38,15 @@ export class ImageUtils {
       console.log(
         `Starting image split request at timestamp: ${requestTimestamp}`
       );
+      
+      // 获取身份验证令牌
+      const authToken = await getAuthToken();
+      
       const response = await fetch("http://127.0.0.1:5001/image/split", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(authToken ? { "Authorization": `Bearer ${authToken}` } : {})
         },
         body: JSON.stringify({
           image_base64: base64Image,
@@ -166,10 +173,15 @@ export class ImageUtils {
 
     try {
       console.log(`Starting request at timestamp: ${requestTimestamp}`);
+      
+      // 获取身份验证令牌
+      const authToken = await getAuthToken();
+      
       const response = await fetch("http://127.0.0.1:5001/relay_image", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(authToken ? { "Authorization": `Bearer ${authToken}` } : {})
         },
         body: JSON.stringify({
           image_base64: base64Image,
@@ -236,10 +248,17 @@ export class ImageUtils {
     // Strategy 2: Query for active requests - use the new endpoint
     try {
       console.log("Fetching list of active requests...");
+      
+      // 获取身份验证令牌
+      const authToken = await getAuthToken();
+      
       const response = await fetch(
         "http://127.0.0.1:5001/request_status/recent",
         {
           method: "GET",
+          headers: {
+            ...(authToken ? { "Authorization": `Bearer ${authToken}` } : {})
+          }
         }
       );
 
@@ -280,10 +299,15 @@ export class ImageUtils {
     // This is a fallback if we can't determine which specific request needs cancellation
     try {
       console.log("Using cleanup endpoint as fallback");
+      
+      // 获取身份验证令牌
+      const authToken = await getAuthToken();
+      
       const response = await fetch("http://127.0.0.1:5001/cleanup_requests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(authToken ? { "Authorization": `Bearer ${authToken}` } : {})
         },
         body: JSON.stringify({ max_age_seconds: 10 }), // Clean up very recent requests
       });
@@ -307,12 +331,17 @@ export class ImageUtils {
 
     try {
       console.log(`Sending cancellation request for ID: ${requestId}`);
+      
+      // 获取身份验证令牌
+      const authToken = await getAuthToken();
+      
       const response = await fetch(
         `http://127.0.0.1:5001/cancel_request/${requestId}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            ...(authToken ? { "Authorization": `Bearer ${authToken}` } : {})
           },
         }
       );

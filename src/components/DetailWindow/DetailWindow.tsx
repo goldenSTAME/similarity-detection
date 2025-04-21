@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./DetailWindow.css";
+import { getAuthToken } from "../../Utils/AuthUtils";
 
 interface ImageDetail {
     brand: string;
@@ -53,10 +54,15 @@ const DetailWindow: React.FC = () => {
         const fetchImageDetail = async () => {
             try {
                 setLoading(true);
+                
+                // 获取认证token
+                const authToken = await getAuthToken();
+                
                 const response = await fetch('http://127.0.0.1:5001/image_detail', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        ...(authToken ? { "Authorization": `Bearer ${authToken}` } : {})
                     },
                     body: JSON.stringify({
                         splitted_image_id: imageId

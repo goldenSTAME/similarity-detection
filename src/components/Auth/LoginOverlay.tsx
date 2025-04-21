@@ -96,6 +96,7 @@ const LoginOverlay: React.FC<LoginOverlayProps> = ({ onLogin, onClose, isDark })
         } else {
           // For session only, use sessionStorage
           sessionStorage.setItem('authToken', data.data.access_token);
+          sessionStorage.setItem('refreshToken', data.data.refresh_token);
           sessionStorage.setItem('user', JSON.stringify({
             id: data.data.user_id,
             email: data.data.email,

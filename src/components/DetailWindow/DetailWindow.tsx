@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./DetailWindow.css";
-import { getAuthToken } from "../../Utils/AuthUtils";
+import { getAuthToken, getUser } from "../../Utils/AuthUtils";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface ImageDetail {
     brand: string;
@@ -31,6 +33,14 @@ const DetailWindow: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // 检查用户是否为管理员
+    useEffect(() => {
+        const user = getUser();
+        setIsAdmin(user?.role === "admin");
+    }, []);
 
     useEffect(() => {
         // Check system preference for dark mode
@@ -41,7 +51,6 @@ const DetailWindow: React.FC = () => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
         mediaQuery.addEventListener('change', handleChange);
-        
         return () => mediaQuery.removeEventListener('change', handleChange);
     }, []);
 
@@ -99,6 +108,46 @@ const DetailWindow: React.FC = () => {
         setIsDarkMode(!isDarkMode);
     };
 
+    // 删除图片记录
+    const handleDelete = async () => {
+        // 弹出确认对话框
+        if (!window.confirm("确定要删除该图片记录吗？此操作不可撤销。")) {
+            return;
+        }
+
+        if (!imageId) return;
+
+        try {
+            setIsDeleting(true);
+            const authToken = await getAuthToken();
+            
+            const response = await fetch(`http://127.0.0.1:5001/splitted_images/${imageId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(authToken ? { "Authorization": `Bearer ${authToken}` } : {})
+                }
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                toast.success(`图片记录删除成功 id: ${imageId}`);
+                // 删除成功后延迟返回上一页
+                setTimeout(() => {
+                    navigate(-1);
+                }, 1500);
+            } else {
+                toast.error(data.message || "删除失败");
+            }
+        } catch (err) {
+            toast.error("删除操作失败，请重试");
+            console.error("Delete failed:", err);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="detail-window">
@@ -127,9 +176,20 @@ const DetailWindow: React.FC = () => {
                 <button onClick={handleBack} className="back-button">
                     ← Back
                 </button>
-                <button onClick={toggleTheme} className="theme-toggle">
-                    {isDarkMode ? '☀️' : '🌙'}
-                </button>
+                <div className="right-controls">
+                    {isAdmin && (
+                        <button
+                            onClick={handleDelete}
+                            className="delete-button"
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? "Deleting..." : "Delete Image"}
+                        </button>
+                    )}
+                    <button onClick={toggleTheme} className="theme-toggle">
+                        {isDarkMode ? '☀️' : '🌙'}
+                    </button>
+                </div>
             </div>
             
             {imageDetail && (
@@ -193,6 +253,18 @@ const DetailWindow: React.FC = () => {
                     </div>
                 </div>
             )}
+            <ToastContainer 
+                position="top-right"
+                autoClose={2000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme={isDarkMode ? "dark" : "light"}
+            />
         </div>
     );
 };

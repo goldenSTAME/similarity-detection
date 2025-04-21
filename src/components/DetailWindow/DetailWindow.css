@@ -208,6 +208,56 @@
     padding: 0 2rem;
 }
 
+.right-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px; /* 保持一致的圆角 */
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+    white-space: nowrap;
+    /* 确保形状不受其他样式影响 */
+    width: auto;
+    height: auto;
+    position: relative;
+}
+
+.delete-button:hover {
+    background-color: #bd2130; /* 更深的红色 */
+    border-radius: 6px; /* 明确保持相同的圆角半径 */
+    /* 移除任何可能改变形状的属性 */
+    border: none;
+    outline: none;
+    box-shadow: none;
+    width: auto;
+    height: auto;
+}
+
+/* 为确保样式不被覆盖，使用更高特异性 */
+.right-controls .delete-button:hover {
+    border-radius: 6px !important;
+    background-color: #bd2130 !important;
+}
+
+/* 禁用状态 */
+.delete-button:disabled {
+    background-color: #e57373;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 .theme-toggle {
     background: none;
     border: none;

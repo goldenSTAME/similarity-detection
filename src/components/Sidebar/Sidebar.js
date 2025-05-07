@@ -22,7 +22,7 @@ const menuItems = [
   { name: "Select Image", animation: selectImageAnimation, framePause: 22 },
   { name: "History", animation: historyAnimation, framePause: 23 },
   { name: "Details", animation: detailsAnimation, framePause: 23 },
-  { name: "Logs", animation: logsAnimation, framePause: 20 },
+  { name: "Administrator", animation: logsAnimation, framePause: 20, adminOnly: true },
   { name: "Setting", animation: null },
   { name: "Support", animation: null },
 ];
@@ -41,7 +41,7 @@ function Sidebar({
     "Select Image": false,
     "History": false,
     "Details": false,
-    "Logs": false,
+    "Administrator": false,
   });
 
   // 用于检测浏览器是否支持 APNG
@@ -57,7 +57,7 @@ function Sidebar({
     "Select Image": null,
     "History": null,
     "Details": null,
-    "Logs": null,
+    "Administrator": null,
   });
 
   const animationState = useRef({
@@ -67,7 +67,7 @@ function Sidebar({
       "Select Image": selectImageAnimation.op - 1,
       "History": historyAnimation.op - 1,
       "Details": detailsAnimation.op - 1,
-      "Logs": logsAnimation.op - 1,
+      "Administrator": logsAnimation.op - 1,
     },
   });
 
@@ -143,13 +143,13 @@ function Sidebar({
         navigate("/history"); // 跳转到 History 页面
       } else if (itemName === "Details") {
         navigate("/details"); // 跳转到 Details 页面
-      } else if (itemName === "Logs") {
-        navigate("/logs"); // 跳转到 Logs 页面
+      } else if (itemName === "Administrator") {
+        navigate("/admin"); // 跳转到 Administrator 页面
       }
     }
   };
 
-  // 点击菜单项时触发的函数，确保倍速播放且动画不被打断
+  // 恢复原有的鼠标按下和松开逻辑，使动画效果更完整
   const handleItemMouseDown = (itemName) => {
     // 在锁定模式下，不播放动画
     if (allowThemeToggleOnly) return;
@@ -175,65 +175,14 @@ function Sidebar({
     setIsLottiePlaying((prev) => ({ ...prev, [itemName]: true }));
   };
 
-  // 恢复原有的鼠标按下和松开逻辑，注释化以便后续恢复
-  /*
-  const handleItemMouseDown = (itemName) => {
-    const anim = lottieRefs.current[itemName];
-    if (!anim || isLottiePlaying[itemName]) return;
-
-    animationState.current.currentItem = itemName;
-    anim.anim.stop();
-    anim.anim.playSegments([0, menuItems.find(i => i.name === itemName).framePause], true);
-
-    setIsLottiePlaying(prev => ({ ...prev, [itemName]: true }));
-  };
-
+  // 添加mouseUp和mouseLeave事件处理函数，增强交互体验
   const handleItemMouseUp = (itemName) => {
-    const state = animationState.current;
-    if (!state.currentItem || state.currentItem !== itemName) return;
-
-    const anim = lottieRefs.current[itemName];
-    if (!anim?.anim) return;
-
-    const currentFrame = Math.min(
-      anim.anim.currentFrame,
-      state.totalFrames[itemName]
-    );
-
-    anim.anim.setSpeed(1.75);
-    anim.anim.playSegments([
-      currentFrame,
-      state.totalFrames[itemName]
-    ], true);
+    // 可以在这里添加鼠标抬起效果，如果需要
   };
-  */
 
-  // 恢复 Lottie 动画的配置选项（未使用，注释化）
-  /*
-  const lottieOptions = (itemName) => ({
-    animationData: menuItems.find((i) => i.name === itemName).animation,
-    loop: false,
-    autoplay: false,
-    rendererSettings: {
-      preserveAspectRatio: "xMidYMid slice",
-      progressiveLoad: true,
-    },
-  });
-  */
-
-  // 恢复动画完成后的回调（未使用，注释化）
-  /*
-  const handleAnimationComplete = (itemName) => {
-    const anim = lottieRefs.current[itemName];
-    if (anim) {
-      anim.anim.setSpeed(1); // 可选：重置速度为 1 倍，视需求可删除
-      console.log(`动画 ${itemName} 播放完成，速度重置为: ${anim.anim.animationSpeed || '未知'}`);
-    }
-    // 更新播放状态为未播放
-    setIsLottiePlaying((prev) => ({ ...prev, [itemName]: false }));
-    animationState.current.currentItem = null;
+  const handleItemMouseLeave = (itemName) => {
+    // 可以在这里添加鼠标离开效果，如果需要
   };
-  */
 
   // 鼠标移入时立即切换APNG并播放8秒，即使鼠标离开也不停止
   const handleMouseEnterLogo = () => {
@@ -258,6 +207,12 @@ function Sidebar({
   // 检查菜单项是否应禁用
   const isItemDisabled = (itemName) => {
     return allowThemeToggleOnly && itemName !== "Theme Toggle";
+  };
+
+  // 检查菜单项是否应隐藏（管理员专属功能）
+  const shouldShowMenuItem = (item) => {
+    // 如果不是管理员专属项，或者用户是管理员，则显示
+    return !item.adminOnly || (user && user.role === 'admin');
   };
 
   return (
@@ -290,7 +245,7 @@ function Sidebar({
       {/* 菜单区域 - 当allowThemeToggleOnly为true时，菜单项被禁用 */}
       <nav className={`sidebar-menu ${allowThemeToggleOnly ? 'menu-disabled' : ''}`}>
         <ul className="menu-list">
-          {menuItems.map((item, index) => (
+          {menuItems.filter(shouldShowMenuItem).map((item, index, filteredItems) => (
             <React.Fragment key={item.name}>
               <li
                 className={`menu-item ${
@@ -300,11 +255,8 @@ function Sidebar({
                 onMouseDown={() =>
                   item.animation && handleItemMouseDown(item.name)
                 }
-                // 原有的 mouseUp 和 mouseLeave 事件，注释化以便后续恢复
-                /*
                 onMouseUp={() => item.animation && handleItemMouseUp(item.name)}
-                onMouseLeave={() => item.animation && handleItemMouseUp(item.name)}
-                */
+                onMouseLeave={() => item.animation && handleItemMouseLeave(item.name)}
               >
                 {item.animation && (
                   <div
@@ -317,7 +269,7 @@ function Sidebar({
                 )}
                 <span>{item.name}</span>
               </li>
-              {index === 3 && <div className="menu-divider" />}
+              {index === 3 && filteredItems.length > 4 && <div className="menu-divider" />}
             </React.Fragment>
           ))}
         </ul>

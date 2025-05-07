@@ -5,6 +5,7 @@ import Sidebar from "./components/Sidebar/Sidebar";
 import SelectImageWindow from "./components/SelectImageWindow/SelectImageWindow";
 import DetailWindow from "./components/DetailWindow/DetailWindow";
 import HistoryWindow from "./components/HistoryWindow/HistoryWindow";
+import AdminPage from "./components/AdminPage/AdminPage";
 import LoginOverlay from "./components/Auth/LoginOverlay";
 import UserProfile from "./components/Auth/UserProfile";
 import { checkAuth, getUser, UserData } from "./Utils/AuthUtils";
@@ -196,6 +197,11 @@ function App() {
               <Route path="/details/:imageId?" element={
                 <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
                   <DetailWindow />
+                </AuthRequired>
+              } />
+              <Route path="/admin" element={
+                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
+                  <AdminPage />
                 </AuthRequired>
               } />
             </Routes>

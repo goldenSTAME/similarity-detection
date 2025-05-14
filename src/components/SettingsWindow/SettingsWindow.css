@@ -1,0 +1,756 @@
+/* src/components/SettingsWindow/SettingsWindow.css */
+.settings-window {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 80px; /* Add space for the save button at bottom */
+}
+
+.settings-window h1 {
+    font-size: 28px;
+    margin-bottom: 30px;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+/* Main layout */
+.settings-layout {
+    display: flex;
+    gap: 30px;
+}
+
+/* Sidebar */
+.settings-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+}
+
+.settings-nav-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    text-align: left;
+    color: #555;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.settings-nav-button svg {
+    margin-right: 10px;
+}
+
+.settings-nav-button:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.settings-nav-button.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Content area */
+.settings-content {
+    flex: 1;
+    position: relative;
+}
+
+.settings-section {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.settings-section h2 {
+    font-size: 20px;
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #333;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.settings-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background-color: #007bff;
+    border-radius: 3px;
+}
+
+.settings-group {
+    margin-bottom: 30px;
+}
+
+.settings-group h3 {
+    font-size: 17px;
+    margin-bottom: 15px;
+    color: #444;
+    transition: color 0.3s ease;
+}
+
+/* Individual settings rows */
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+    transition: border-color 0.3s ease;
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-row label {
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.settings-row input[type="text"],
+.settings-row input[type="email"],
+.settings-row input[type="number"],
+.settings-row select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    flex: 0 0 250px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.settings-row input[type="text"]:focus,
+.settings-row input[type="email"]:focus,
+.settings-row input[type="number"]:focus,
+.settings-row select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+/* Checkbox specific styles */
+.checkbox-row {
+    align-items: flex-start;
+}
+
+.checkbox-row label {
+    display: flex;
+    flex-direction: column;
+}
+
+.checkbox-row input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+.setting-description {
+    font-size: 12px;
+    color: #777;
+    margin-top: 5px;
+    transition: color 0.3s ease;
+}
+
+/* Info rows for account section */
+.info-row .label {
+    font-weight: 500;
+    color: #555;
+    transition: color 0.3s ease;
+}
+
+.info-row .value {
+    color: #333;
+    font-weight: normal;
+    transition: color 0.3s ease;
+}
+
+.account-type {
+    display: inline-block;
+    padding: 4px 10px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Account actions */
+.account-actions {
+    margin-top: 30px;
+}
+
+.account-action-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    background-color: #f8f8f8;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    text-align: left;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.account-action-button svg {
+    margin-right: 10px;
+}
+
+.account-action-button:hover {
+    background-color: #eee;
+    transform: translateY(-2px);
+}
+
+.account-action-button.danger {
+    color: #d9534f;
+}
+
+.account-action-button.danger:hover {
+    background-color: #ffeaea;
+}
+
+/* Theme selector */
+.theme-selector {
+    margin-top: 20px;
+}
+
+.theme-options {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.theme-option {
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.theme-option:hover {
+    background-color: #f0f0f0;
+}
+
+.theme-option.active {
+    background-color: #e9f5ff;
+}
+
+.theme-preview {
+    width: 80px;
+    height: 50px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #ddd;
+}
+
+.theme-option.light .theme-preview {
+    background-color: #ffffff;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+.theme-option.dark .theme-preview {
+    background-color: #222;
+}
+
+.theme-option.system .theme-preview {
+    background: linear-gradient(to right, #fff 50%, #222 50%);
+}
+
+.theme-note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #777;
+    font-style: italic;
+}
+
+/* Privacy links */
+.privacy-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.privacy-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.privacy-link:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* Data management */
+.data-management {
+    margin-bottom: 30px;
+}
+
+.data-action-button {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background-color: #f8f8f8;
+    border: none;
+    border-radius: 6px;
+    color: #444;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.data-action-button svg {
+    margin-right: 10px;
+}
+
+.data-action-button:hover {
+    background-color: #eee;
+}
+
+.data-action-button.danger {
+    color: #d9534f;
+}
+
+.data-action-button.danger:hover {
+    background-color: #ffeaea;
+}
+
+/* New simple save button */
+.settings-save-button {
+    display: block;
+    margin: 30px auto 0;
+    padding: 12px 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.settings-save-button:hover {
+    background-color: #0069d9;
+    transform: translateY(-2px);
+}
+
+.settings-save-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.settings-save-button.saving {
+    background-color: #6c757d;
+    cursor: progress;
+}
+
+.save-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Confirmation modal */
+.settings-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.settings-modal {
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.settings-modal h3 {
+    margin-top: 0;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.settings-modal p {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.settings-modal input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.cancel-button {
+    padding: 8px 16px;
+    background-color: #f8f8f8;
+    border: none;
+    border-radius: 6px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+    background-color: #eee;
+}
+
+.delete-button {
+    padding: 8px 16px;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #c9302c;
+}
+
+.delete-button:disabled {
+    background-color: #e9acaa;
+    cursor: not-allowed;
+}
+
+/* Loading state */
+.settings-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.settings-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.settings-loading p {
+    color: #666;
+}
+
+/* Dark mode styles */
+.dark .settings-window h1 {
+    color: #f1f1f1;
+}
+
+.dark .settings-section {
+    background-color: #2d2d2d;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dark .settings-section h2 {
+    color: #e1e1e1;
+}
+
+.dark .settings-section h2::after {
+    background-color: #0d6efd;
+}
+
+.dark .settings-group h3 {
+    color: #d1d1d1;
+}
+
+.dark .settings-row {
+    border-bottom-color: #444;
+}
+
+.dark .settings-row label {
+    color: #e1e1e1;
+}
+
+.dark .settings-row input[type="text"],
+.dark .settings-row input[type="email"],
+.dark .settings-row input[type="number"],
+.dark .settings-row select {
+    background-color: #333;
+    color: #e1e1e1;
+    border-color: #555;
+}
+
+.dark .settings-row input[type="text"]:focus,
+.dark .settings-row input[type="email"]:focus,
+.dark .settings-row input[type="number"]:focus,
+.dark .settings-row select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.dark .setting-description {
+    color: #aaa;
+}
+
+.dark .info-row .label {
+    color: #bbb;
+}
+
+.dark .info-row .value {
+    color: #e1e1e1;
+}
+
+.dark .account-type {
+    background-color: #0d6efd;
+}
+
+.dark .settings-nav-button {
+    color: #bbb;
+}
+
+.dark .settings-nav-button:hover {
+    background-color: #444;
+    color: #e1e1e1;
+}
+
+.dark .settings-nav-button.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.dark .account-action-button,
+.dark .data-action-button {
+    background-color: #333;
+    color: #e1e1e1;
+}
+
+.dark .account-action-button:hover,
+.dark .data-action-button:hover {
+    background-color: #444;
+}
+
+.dark .account-action-button.danger,
+.dark .data-action-button.danger {
+    color: #ff6b6b;
+}
+
+.dark .account-action-button.danger:hover,
+.dark .data-action-button.danger:hover {
+    background-color: #4a2c2c;
+}
+
+.dark .theme-option {
+    color: #e1e1e1;
+}
+
+.dark .theme-option:hover {
+    background-color: #444;
+}
+
+.dark .theme-option.active {
+    background-color: #18344a;
+}
+
+.dark .theme-preview {
+    border-color: #444;
+}
+
+.dark .theme-note {
+    color: #aaa;
+}
+
+.dark .privacy-link {
+    color: #6ea8fe;
+}
+
+.dark .privacy-link:hover {
+    color: #9ec5fe;
+}
+
+.dark .settings-save-button {
+    background-color: #0d6efd;
+}
+
+.dark .settings-save-button:hover {
+    background-color: #0b5ed7;
+}
+
+.dark .settings-save-button:disabled,
+.dark .settings-save-button.saving {
+    background-color: #495057;
+}
+
+.dark .settings-modal {
+    background-color: #2d2d2d;
+}
+
+.dark .settings-modal h3 {
+    color: #e1e1e1;
+}
+
+.dark .settings-modal p {
+    color: #bbb;
+}
+
+.dark .settings-modal input {
+    background-color: #333;
+    color: #e1e1e1;
+    border-color: #555;
+}
+
+.dark .cancel-button {
+    background-color: #333;
+    color: #e1e1e1;
+}
+
+.dark .cancel-button:hover {
+    background-color: #444;
+}
+
+.dark .delete-button {
+    background-color: #dc3545;
+}
+
+.dark .delete-button:hover {
+    background-color: #bb2d3b;
+}
+
+.dark .delete-button:disabled {
+    background-color: #73393e;
+}
+
+.dark .settings-spinner {
+    border-color: #444;
+    border-top-color: #0d6efd;
+}
+
+.dark .settings-loading p {
+    color: #bbb;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .settings-layout {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .settings-sidebar {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .settings-nav-button {
+        flex: 1 0 40%;
+        margin-bottom: 0;
+    }
+
+    .settings-window h1 {
+        font-size: 24px;
+    }
+
+    .settings-row input[type="text"],
+    .settings-row input[type="email"],
+    .settings-row input[type="number"],
+    .settings-row select {
+        flex: 0 0 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-nav-button {
+        flex: 1 0 100%;
+    }
+
+    .settings-section {
+        padding: 15px;
+    }
+
+    .settings-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .settings-row input[type="text"],
+    .settings-row input[type="email"],
+    .settings-row input[type="number"],
+    .settings-row select {
+        width: 100%;
+    }
+
+    .checkbox-row {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .theme-options {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .theme-option {
+        display: flex;
+        align-items: center;
+        text-align: left;
+    }
+
+    .theme-preview {
+        margin-bottom: 0;
+        margin-right: 10px;
+    }
+}

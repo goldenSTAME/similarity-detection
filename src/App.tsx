@@ -1,4 +1,4 @@
-// src/App.tsx
+// src/App.tsx (updated with Support route)
 import React, { useEffect, useState, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -6,6 +6,8 @@ import SelectImageWindow from "./components/SelectImageWindow/SelectImageWindow"
 import DetailWindow from "./components/DetailWindow/DetailWindow";
 import HistoryWindow from "./components/HistoryWindow/HistoryWindow";
 import AdminPage from "./components/AdminPage/AdminPage";
+import SupportWindow from "./components/SupportWindow/SupportWindow"; // Import Support window
+import SettingsWindow from "./components/SettingsWindow/SettingsWindow";
 import LoginOverlay from "./components/Auth/LoginOverlay";
 import UserProfile from "./components/Auth/UserProfile";
 import { checkAuth, getUser, UserData } from "./Utils/AuthUtils";
@@ -14,18 +16,18 @@ import "./App.css";
 
 // Improved loading animation component
 const LoadingAnimation = ({ isDark }: { isDark: boolean }) => (
-  <div className={`loading-screen ${isDark ? "dark" : "light"}`}>
-    <div className="loading-spinner"></div>
-    <p>Loading...</p>
-  </div>
+    <div className={`loading-screen ${isDark ? "dark" : "light"}`}>
+      <div className="loading-spinner"></div>
+      <p>Loading...</p>
+    </div>
 );
 
 // Integrated login prompt for authenticated content
 const AuthRequired = ({
-  isAuthenticated,
-  onLoginClick,
-  children
-}: {
+                        isAuthenticated,
+                        onLoginClick,
+                        children
+                      }: {
   isAuthenticated: boolean,
   onLoginClick: () => void,
   children: React.ReactNode
@@ -33,15 +35,15 @@ const AuthRequired = ({
   if (!isAuthenticated) {
     // Show only the auth prompt without rendering original content
     return (
-      <div className="auth-required-container">
-        <div className="auth-required-message">
-          <h3>Authentication Required</h3>
-          <p>Please log in to access this feature</p>
-          <button className="login-prompt-button" onClick={onLoginClick}>
-            Login
-          </button>
+        <div className="auth-required-container">
+          <div className="auth-required-message">
+            <h3>Authentication Required</h3>
+            <p>Please log in to access this feature</p>
+            <button className="login-prompt-button" onClick={onLoginClick}>
+              Login
+            </button>
+          </div>
         </div>
-      </div>
     );
   }
   return <>{children}</>;
@@ -138,77 +140,88 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className={`app-container ${isDark ? "dark" : "light"}`}>
-        {/* Login button (text only) or user profile in the top-right corner */}
-        <div className="top-right-auth">
-          {isAuthenticated && user ? (
-            <UserProfile user={user} onLogout={handleLogout} />
-          ) : (
-            <button
-              className="login-text-button"
-              onClick={handleLoginClick}
-              aria-label="Login"
-            >
-              Login
-            </button>
-          )}
-        </div>
+      <Router>
+        <div className={`app-container ${isDark ? "dark" : "light"}`}>
+          {/* Login button (text only) or user profile in the top-right corner */}
+          <div className="top-right-auth">
+            {isAuthenticated && user ? (
+                <UserProfile user={user} onLogout={handleLogout} />
+            ) : (
+                <button
+                    className="login-text-button"
+                    onClick={handleLoginClick}
+                    aria-label="Login"
+                >
+                  Login
+                </button>
+            )}
+          </div>
 
-        {/* Login overlay */}
-        {showLoginOverlay && (
-          <LoginOverlay
-            onLogin={handleLogin}
-            onClose={() => setShowLoginOverlay(false)}
-            isDark={isDark}
+          {/* Login overlay */}
+          {showLoginOverlay && (
+              <LoginOverlay
+                  onLogin={handleLogin}
+                  onClose={() => setShowLoginOverlay(false)}
+                  isDark={isDark}
+              />
+          )}
+
+          <Sidebar
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              activeWindow={activeWindow}
+              setActiveWindow={isAuthenticated ? setActiveWindow : () => handleLoginClick()}
+              user={user}
+              onLogout={handleLogout}
+              allowThemeToggleOnly={!isAuthenticated}
           />
-        )}
 
-        <Sidebar
-          isDark={isDark}
-          toggleTheme={toggleTheme}
-          activeWindow={activeWindow}
-          setActiveWindow={isAuthenticated ? setActiveWindow : () => handleLoginClick()}
-          user={user}
-          onLogout={handleLogout}
-          allowThemeToggleOnly={!isAuthenticated}
-        />
-
-        <main className="main-content">
-          {isCheckingAuth ? (
-            <LoadingAnimation isDark={isDark} />
-          ) : (
-            <Routes>
-              <Route path="/" element={
-                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
-                  <SelectImageWindow />
-                </AuthRequired>
-              } />
-              <Route path="/select-image" element={
-                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
-                  <SelectImageWindow />
-                </AuthRequired>
-              } />
-              <Route path="/history" element={
-                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
-                  <HistoryWindow />
-                </AuthRequired>
-              } />
-              <Route path="/details/:imageId?" element={
-                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
-                  <DetailWindow />
-                </AuthRequired>
-              } />
-              <Route path="/admin" element={
-                <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
-                  <AdminPage />
-                </AuthRequired>
-              } />
-            </Routes>
-          )}
-        </main>
-      </div>
-    </Router>
+          <main className="main-content">
+            {isCheckingAuth ? (
+                <LoadingAnimation isDark={isDark} />
+            ) : (
+                <Routes>
+                  <Route path="/" element={
+                    <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
+                      <SelectImageWindow />
+                    </AuthRequired>
+                  } />
+                  <Route path="/select-image" element={
+                    <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
+                      <SelectImageWindow />
+                    </AuthRequired>
+                  } />
+                  <Route path="/history" element={
+                    <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
+                      <HistoryWindow />
+                    </AuthRequired>
+                  } />
+                  <Route path="/details/:imageId?" element={
+                    <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
+                      <DetailWindow />
+                    </AuthRequired>
+                  } />
+                  <Route path="/admin" element={
+                    <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
+                      <AdminPage />
+                    </AuthRequired>
+                  } />
+                  {/* Updated to use Support instead of Suggest */}
+                  <Route path="/support" element={
+                    <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
+                      <SupportWindow />
+                    </AuthRequired>
+                  } />
+                  <Route path="/settings" element={
+                    <AuthRequired isAuthenticated={isAuthenticated} onLoginClick={handleLoginClick}>
+                      <SettingsWindow />
+                    </AuthRequired>
+                  } />
+                </Routes>
+            )}
+          </main>
+        </div>
+      </Router>
   );
 }
 

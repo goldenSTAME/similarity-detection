@@ -1,3 +1,4 @@
+// src/components/Sidebar/Sidebar.js
 import React, { useState, useEffect, useRef } from "react";
 import lottie from "lottie-web";
 import selectImageAnimation from "../../animations/selectImage.json";
@@ -19,24 +20,24 @@ import "./Sidebar.css";
 import { useNavigate } from "react-router-dom";
 
 const menuItems = [
-  { name: "Select Image", animation: selectImageAnimation, framePause: 22 },
-  { name: "History", animation: historyAnimation, framePause: 23 },
-  { name: "Details", animation: detailsAnimation, framePause: 23 },
-  { name: "Administrator", animation: logsAnimation, framePause: 20, adminOnly: true },
-  { name: "Setting", animation: null },
-  { name: "Support", animation: null },
+  { name: "Select Image", animation: selectImageAnimation, framePause: 22, path: "/select-image" },
+  { name: "History", animation: historyAnimation, framePause: 23, path: "/history" },
+  { name: "Details", animation: detailsAnimation, framePause: 23, path: "/details" },
+  { name: "Administrator", animation: logsAnimation, framePause: 20, adminOnly: true, path: "/admin" },
+  { name: "Support", animation: null, path: "/support" }, // Moved after Administrator
+  { name: "Settings", animation: null, path: "/settings" },
 ];
 
 // 更新函数参数，添加 allowThemeToggleOnly 来控制菜单项的可用性
 function Sidebar({
-  isDark,
-  toggleTheme,
-  activeWindow,
-  setActiveWindow,
-  user,
-  onLogout,
-  allowThemeToggleOnly = false
-}) {
+                   isDark,
+                   toggleTheme,
+                   activeWindow,
+                   setActiveWindow,
+                   user,
+                   onLogout,
+                   allowThemeToggleOnly = false
+                 }) {
   const [isLottiePlaying, setIsLottiePlaying] = useState({
     "Select Image": false,
     "History": false,
@@ -132,20 +133,12 @@ function Sidebar({
     active: { rotate: 15, scale: 1.1 },
   };
 
-  const handleItemClick = (itemName) => {
+  const handleItemClick = (itemName, itemPath) => {
     setActiveWindow(itemName);
 
     // 只有在未被锁定时才执行导航
-    if (!allowThemeToggleOnly) {
-      if (itemName === "Select Image") {
-        navigate("/select-image"); // 跳转到 SelectImageWindow
-      } else if (itemName === "History") {
-        navigate("/history"); // 跳转到 History 页面
-      } else if (itemName === "Details") {
-        navigate("/details"); // 跳转到 Details 页面
-      } else if (itemName === "Administrator") {
-        navigate("/admin"); // 跳转到 Administrator 页面
-      }
+    if (!allowThemeToggleOnly && itemPath) {
+      navigate(itemPath);
     }
   };
 
@@ -216,70 +209,70 @@ function Sidebar({
   };
 
   return (
-    <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
-      {/* 头部 Logo，使用 APNG 动画或 fallback 图片 */}
-      <div className="sidebar-header">
-        <div className="logo-container">
-          {apngSupported ? (
-            showApng ? (
-              <img
-                className="logo-video"
-                src={logoApng}
-                alt="APNG Logo"
-              />
+      <aside className={`sidebar ${isDark ? "dark-mode" : "light-mode"}`}>
+        {/* 头部 Logo，使用 APNG 动画或 fallback 图片 */}
+        <div className="sidebar-header">
+          <div className="logo-container">
+            {apngSupported ? (
+                showApng ? (
+                    <img
+                        className="logo-video"
+                        src={logoApng}
+                        alt="APNG Logo"
+                    />
+                ) : (
+                    <img
+                        className="logo-video"
+                        src={fallbackImage}
+                        alt="Fallback Logo"
+                        onMouseEnter={handleMouseEnterLogo}
+                    />
+                )
             ) : (
-              <img
-                className="logo-video"
-                src={fallbackImage}
-                alt="Fallback Logo"
-                onMouseEnter={handleMouseEnterLogo}
-              />
-            )
-          ) : (
-            // 不支持 APNG，则一直是 fallback
-            <img className="logo-video" src={fallbackImage} alt="Fallback Logo" />
-          )}
+                // 不支持 APNG，则一直是 fallback
+                <img className="logo-video" src={fallbackImage} alt="Fallback Logo" />
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* 菜单区域 - 当allowThemeToggleOnly为true时，菜单项被禁用 */}
-      <nav className={`sidebar-menu ${allowThemeToggleOnly ? 'menu-disabled' : ''}`}>
-        <ul className="menu-list">
-          {menuItems.filter(shouldShowMenuItem).map((item, index, filteredItems) => (
-            <React.Fragment key={item.name}>
-              <li
-                className={`menu-item ${
-                  activeWindow === item.name ? "active" : ""
-                } ${isItemDisabled(item.name) ? "disabled" : ""}`}
-                onClick={() => handleItemClick(item.name)}
-                onMouseDown={() =>
-                  item.animation && handleItemMouseDown(item.name)
-                }
-                onMouseUp={() => item.animation && handleItemMouseUp(item.name)}
-                onMouseLeave={() => item.animation && handleItemMouseLeave(item.name)}
-              >
-                {item.animation && (
-                  <div
-                    id={`lottie-${item.name}`}
-                    className={`lottie-container ${
-                      isDark ? "dark-lottie" : "light-lottie"
-                    }`}
-                    style={{ width: 24, height: 24 }}
-                  />
-                )}
-                <span>{item.name}</span>
-              </li>
-              {index === 3 && filteredItems.length > 4 && <div className="menu-divider" />}
-            </React.Fragment>
-          ))}
-        </ul>
-      </nav>
+        {/* 菜单区域 - 当allowThemeToggleOnly为true时，菜单项被禁用 */}
+        <nav className={`sidebar-menu ${allowThemeToggleOnly ? 'menu-disabled' : ''}`}>
+          <ul className="menu-list">
+            {menuItems.filter(shouldShowMenuItem).map((item, index, filteredItems) => (
+                <React.Fragment key={item.name}>
+                  <li
+                      className={`menu-item ${
+                          activeWindow === item.name ? "active" : ""
+                      } ${isItemDisabled(item.name) ? "disabled" : ""}`}
+                      onClick={() => handleItemClick(item.name, item.path)}
+                      onMouseDown={() =>
+                          item.animation && handleItemMouseDown(item.name)
+                      }
+                      onMouseUp={() => item.animation && handleItemMouseUp(item.name)}
+                      onMouseLeave={() => item.animation && handleItemMouseLeave(item.name)}
+                  >
+                    {item.animation && (
+                        <div
+                            id={`lottie-${item.name}`}
+                            className={`lottie-container ${
+                                isDark ? "dark-lottie" : "light-lottie"
+                            }`}
+                            style={{ width: 24, height: 24 }}
+                        />
+                    )}
+                    <span>{item.name}</span>
+                  </li>
+                  {index === 3 && filteredItems.length > 4 && <div className="menu-divider" />}
+                </React.Fragment>
+            ))}
+          </ul>
+        </nav>
 
-      {/* 主题切换按钮 - 独立组件，始终保持可用 */}
-      <div className="sidebar-footer">
-        <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
-      </div>
-    </aside>
+        {/* 主题切换按钮 - 独立组件，始终保持可用 */}
+        <div className="sidebar-footer">
+          <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
+        </div>
+      </aside>
   );
 }
 

@@ -1,5 +1,18 @@
 /* App.css */
 
+/* Add this to prevent unwanted scrollbars, especially in the admin page */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Prevent horizontal scrollbar at the document level */
+}
+
+/* For the admin page specifically */
+body.admin-view {
+  overflow: hidden; /* Prevent all scrollbars when in admin view */
+}
+
 /* 基本布局 */
 .app-container {
   display: flex;
@@ -18,6 +31,11 @@
   box-sizing: border-box;
   height: 100vh;
   overflow: auto;
+}
+
+/* Prevent main content overflow when in admin view */
+body.admin-view .main-content {
+  overflow: hidden;
 }
 
 /* 标题和副标题 */
